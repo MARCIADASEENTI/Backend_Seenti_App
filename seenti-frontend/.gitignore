@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+#novo conteudo
+# Ambientes
+venv/
+node_modules/
+
+# Arquivos de ambiente e credenciais
+.env
+*.env
+
+# Arquivos de anotação pessoal que não devem ir para o repositório
+tarefas.md
+checklist_retomada_seenti.md
+*.backup
+*.bak
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db

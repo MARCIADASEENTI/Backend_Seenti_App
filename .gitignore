@@ -1,0 +1,32 @@
+# Node
+node_modules/
+dist/
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+.env
+*.sqlite3
+
+# Logs e cache
+*.log
+*.cache
+*.bak
+*.tmp
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# VSCode e editor configs
+.vscode/
+.idea/
+*.swp
+
+# Arquivos gerados
+*.docx
+*.pdf
