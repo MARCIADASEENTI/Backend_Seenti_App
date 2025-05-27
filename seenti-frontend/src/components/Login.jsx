@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import './Login.css';
 
 function Login({ onLoginSucesso }) {
   const [form, setForm] = useState({
@@ -6,14 +7,15 @@ function Login({ onLoginSucesso }) {
     senha: ''
   });
 
+  const [erro, setErro] = useState('');
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setErro('');
     try {
       const response = await fetch('http://127.0.0.1:5000/login', {
         method: 'POST',
@@ -22,33 +24,41 @@ function Login({ onLoginSucesso }) {
       });
 
       const data = await response.json();
-      alert(data.mensagem || data.erro);
 
-      if (response.ok && onLoginSucesso) {
+      if (response.ok) {
+        alert(data.mensagem);
         onLoginSucesso(data.usuario_id);
+      } else {
+        setErro(data.erro || 'Erro ao realizar login.');
       }
-
     } catch (error) {
-      alert('Erro ao fazer login.');
       console.error(error);
+      setErro('Erro ao conectar ao servidor.');
     }
   };
 
   return (
-    <div>
+    <div className="login-container">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <label>
-          Email:<br />
-          <input type="email" name="email" value={form.email} onChange={handleChange} required />
-        </label><br />
-
-        <label>
-          Senha:<br />
-          <input type="password" name="senha" value={form.senha} onChange={handleChange} required />
-        </label><br />
-
+        <input
+          type="email"
+          name="email"
+          placeholder="E-mail"
+          value={form.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="senha"
+          placeholder="Senha"
+          value={form.senha}
+          onChange={handleChange}
+          required
+        />
         <button type="submit">Entrar</button>
+        {erro && <p style={{ color: 'red' }}>{erro}</p>}
       </form>
     </div>
   );

@@ -27,12 +27,18 @@ function App() {
         <TermoUso usuarioId={usuarioId} onAceiteConcluido={() => setTermoAceito(true)} />
       )}
       {tela === 'cliente' && termoAceito && (
-        <CadastroCliente
-          usuarioId={usuarioId}
-          onCadastroCompleto={() => setTela('boas-vindas')}
-        />
-      )}
-      {tela === 'boas-vindas' && <TelaBoasVindas onAvancar={() => alert("Pronto para anamnese!")} />}
+  <CadastroCliente
+    usuarioId={usuarioId}
+    onCadastroClienteFinalizado={() => setTela('boas-vindas')}
+  />
+)}
+
+{tela === 'boas-vindas' && (
+  <TelaBoasVindas onAvancar={() => {
+    // aqui você decide: redirecionar para anamnese, menu, etc.
+    console.log("Avançando para próxima etapa...");
+  }} />
+)}
     </div>
   );
 }
