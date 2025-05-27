@@ -1,18 +1,19 @@
 import { useState } from 'react';
+import './CadastroUsuario.css';
 
 function CadastroUsuario({ onCadastroSucesso }) {
   const [form, setForm] = useState({
     email: '',
     cpf: '',
     senha: '',
-    consentimento: false
+    consentimento: false,
   });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -23,46 +24,49 @@ function CadastroUsuario({ onCadastroSucesso }) {
       const response = await fetch('http://127.0.0.1:5000/usuarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
 
       const data = await response.json();
-      alert(data.mensagem || data.erro);
 
-      if (response.ok && onCadastroSucesso) {
+      if (response.ok) {
+        alert(data.mensagem);
         onCadastroSucesso();
+      } else {
+        alert(data.erro || 'Erro ao cadastrar usuário.');
       }
-
     } catch (error) {
+      console.error('Erro ao cadastrar usuário:', error);
       alert('Erro ao cadastrar usuário.');
-      console.error(error);
     }
   };
 
   return (
-    <div>
+    <div className="cadastro-container">
       <h2>Cadastro de Usuário</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="cadastro-form">
         <label>
-          Email:<br />
+          E-mail:
           <input type="email" name="email" value={form.email} onChange={handleChange} required />
-        </label><br />
-
+        </label>
         <label>
-          CPF:<br />
+          CPF:
           <input type="text" name="cpf" value={form.cpf} onChange={handleChange} required />
-        </label><br />
-
+        </label>
         <label>
-          Senha:<br />
+          Senha:
           <input type="password" name="senha" value={form.senha} onChange={handleChange} required />
-        </label><br />
-
-        <label>
-          <input type="checkbox" name="consentimento" checked={form.consentimento} onChange={handleChange} />
-          Aceito os termos da LGPD
-        </label><br />
-
+        </label>
+        <label className="termo-checkbox">
+          <input
+            type="checkbox"
+            name="consentimento"
+            checked={form.consentimento}
+            onChange={handleChange}
+            required
+          />
+          Eu aceito os termos de uso e política de privacidade
+        </label>
         <button type="submit">Cadastrar</button>
       </form>
     </div>
