@@ -366,7 +366,7 @@ def aceitar_termo_uso():
     db.termos_uso.insert_one(termo)
     return jsonify({"mensagem": "Termo de uso aceito e registrado."}), 201
 
-
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)
+
+

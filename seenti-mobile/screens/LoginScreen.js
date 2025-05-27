@@ -10,7 +10,7 @@ export default function LoginScreen({ navigation }) {
       const response = await fetch('http://10.0.0.167:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha }),
+        body: JSON.stringify( {marcia@teste.com,123456}),
       });
 
       const data = await response.json();
