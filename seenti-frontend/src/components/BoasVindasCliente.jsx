@@ -1,15 +1,15 @@
 import React from 'react';
-import './TelaBoasVindas.css';
+import './BoasVindasCliente.css';
 
-function TelaBoasVindas({ onAvancar }) {
+function BoasVindasCliente({ onAvancar }) {
   return (
-    <div className="boas-vindas-container">
-      <h1>🎉 Bem-vinda ao Projeto Seenti!</h1>
-      <p>Seu cadastro foi concluído com sucesso. Agradecemos pela confiança!</p>
-      <p>Agora você está pronta para iniciar sua jornada terapêutica conosco.</p>
+    <div className="boas-vindas-cliente-container">
+      <h1>👏 Cadastro concluído com sucesso!</h1>
+      <p>Seja bem-vinda à sua nova jornada terapêutica.</p>
+      <p>A partir de agora, você poderá acompanhar seus atendimentos e evolução.</p>
       <button onClick={onAvancar}>Avançar</button>
     </div>
   );
 }
 
-export default TelaBoasVindas;
+export default BoasVindasCliente;

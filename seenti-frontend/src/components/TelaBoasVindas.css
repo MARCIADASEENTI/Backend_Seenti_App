@@ -1,37 +1,40 @@
 .boas-vindas-container {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 32px;
-    background-color: #f8f8ff;
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
     text-align: center;
+    font-family: Arial, sans-serif;
   }
   
   .boas-vindas-container h1 {
-    color: #0077cc;
+    color: #1d3557;
     margin-bottom: 20px;
+    font-size: 1.5rem;
   }
   
   .boas-vindas-container p {
-    font-size: 1.1em;
+    font-size: 1rem;
     color: #444;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
   }
   
   .boas-vindas-container button {
-    margin-top: 30px;
-    padding: 12px 24px;
-    font-size: 1em;
-    background-color: #0077cc;
+    margin-top: 10px;
+    padding: 10px 25px;
+    font-size: 1rem;
+    background-color: #457b9d;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
   
   .boas-vindas-container button:hover {
-    background-color: #005fa3;
+    background-color: #1d3557;
   }
   
