@@ -28,12 +28,11 @@ def cadastrar_usuario():
     data = request.get_json()
 
     email = data.get("email")
-    cpf = data.get("cpf")
     senha = data.get("senha")
     consentimento = data.get("consentimento", False)
 
     # Validação básica
-    if not all([email, cpf, senha]) or not consentimento:
+    if not all([email, senha]) or not consentimento:
         return jsonify({"erro": "Dados incompletos ou consentimento não aceito."}), 400
 
     # Verificar se já existe
@@ -44,14 +43,17 @@ def cadastrar_usuario():
 
     usuario = {
         "email": email,
-        "cpf": cpf,
         "senha": senha_hash,
         "consentimento": consentimento
     }
 
-    db.usuarios.insert_one(usuario)
+    resultado = db.usuarios.insert_one(usuario)
 
-    return jsonify({"mensagem": "Usuário cadastrado com sucesso!"}), 201
+    return jsonify({
+        "mensagem": "Usuário cadastrado com sucesso!",
+        "usuario_id": str(resultado.inserted_id)
+    }), 201
+
 
 ### 
 

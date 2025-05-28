@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Login.css';
 
-function Login({ onLoginSucesso }) {
+function Login({ onLoginSucesso, navegarParaTermo }) {
   const [form, setForm] = useState({
     email: '',
     senha: ''
@@ -26,8 +26,12 @@ function Login({ onLoginSucesso }) {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.mensagem);
-        onLoginSucesso(data.usuario_id);
+        if (data.aceito_termo) {
+          onLoginSucesso(data.usuario_id);
+        } else {
+          alert('Você precisa aceitar os termos de uso antes de continuar.');
+          navegarParaTermo(data.usuario_id);
+        }
       } else {
         setErro(data.erro || 'Erro ao realizar login.');
       }

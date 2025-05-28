@@ -1,10 +1,10 @@
+// src/components/CadastroUsuario.jsx
 import { useState } from 'react';
 import './CadastroUsuario.css';
 
 function CadastroUsuario({ onCadastroSucesso }) {
   const [form, setForm] = useState({
     email: '',
-    cpf: '',
     senha: '',
     consentimento: false,
   });
@@ -19,7 +19,7 @@ function CadastroUsuario({ onCadastroSucesso }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log('Formulário enviado:', form);
     try {
       const response = await fetch('http://127.0.0.1:5000/usuarios', {
         method: 'POST',
@@ -31,7 +31,7 @@ function CadastroUsuario({ onCadastroSucesso }) {
 
       if (response.ok) {
         alert(data.mensagem);
-        onCadastroSucesso();
+        onCadastroSucesso(data.usuario_id);
       } else {
         alert(data.erro || 'Erro ao cadastrar usuário.');
       }
@@ -48,10 +48,6 @@ function CadastroUsuario({ onCadastroSucesso }) {
         <label>
           E-mail:
           <input type="email" name="email" value={form.email} onChange={handleChange} required />
-        </label>
-        <label>
-          CPF:
-          <input type="text" name="cpf" value={form.cpf} onChange={handleChange} required />
         </label>
         <label>
           Senha:

@@ -1,55 +1,62 @@
-import { useEffect, useState } from 'react';
+// TermoUso.jsx (revisado e funcional)
+import React, { useState, useEffect } from 'react';
+import './TermoUso.css';
 
-function TermoUso({ usuarioId, onAceiteConcluido }) {
-  const [termo, setTermo] = useState(null);
+function TermoUso({ usuarioId, onTermoAceito }) {
+  const [termoTexto, setTermoTexto] = useState('');
   const [aceito, setAceito] = useState(false);
 
   useEffect(() => {
-    async function fetchTermo() {
-      try {
-        const res = await fetch('http://127.0.0.1:5000/termos_texto');
-        const data = await res.json();
-        setTermo(data);
-      } catch (err) {
-        console.error('Erro ao buscar termo de uso:', err);
-      }
-    }
-    fetchTermo();
+    fetch('http://127.0.0.1:5000/termos_texto')
+      .then((res) => res.json())
+      .then((data) => setTermoTexto(data.texto || ''))
+      .catch((err) => console.error('Erro ao carregar termo:', err));
   }, []);
 
   const handleAceite = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:5000/termos_uso', {
+      const response = await fetch('http://127.0.0.1:5000/termos_uso', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          usuario_id: usuarioId,
-          aceito: true
-        })
+        body: JSON.stringify({ usuario_id: usuarioId, aceito_termo: true })
       });
 
-      const data = await res.json();
-      alert(data.mensagem || data.erro);
-
-      if (res.ok) {
-        setAceito(true);
-        onAceiteConcluido();
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.mensagem || 'Termo aceito com sucesso.');
+        onTermoAceito();
+      } else {
+        alert(data.erro || 'Erro ao registrar aceite.');
       }
     } catch (error) {
-      console.error('Erro ao registrar aceite:', error);
+      console.error('Erro ao aceitar termo:', error);
+      alert('Erro de conexão ao aceitar termo.');
     }
   };
 
-  if (!termo) return <p>Carregando termo de uso...</p>;
-
   return (
-    <div>
-      <h2>{termo.titulo}</h2>
-      <div
-        style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem', maxHeight: '300px', overflowY: 'scroll' }}
-        dangerouslySetInnerHTML={{ __html: termo.conteudo_html }}
+    <div className="termo-container">
+      <h2>Termo de Uso e Política de Privacidade</h2>
+      <textarea
+        className="termo-textarea"
+        readOnly
+        value={termoTexto}
+        rows={12}
       />
-      <button onClick={handleAceite}>Li e aceito os termos</button>
+      <button
+        className="btn-termo"
+        onClick={handleAceite}
+        disabled={!aceito}
+      >
+        Li e aceito os termos
+      </button>
+      <label className="checkbox-label">
+        <input
+          type="checkbox"
+          checked={aceito}
+          onChange={(e) => setAceito(e.target.checked)}
+        /> Eu li e concordo com os termos acima
+      </label>
     </div>
   );
 }
