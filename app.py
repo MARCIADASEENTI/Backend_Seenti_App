@@ -335,16 +335,15 @@ def listar_recomendacoes_fitoterapicos():
         return jsonify({"erro": f"Erro ao listar recomendações: {str(e)}"}), 500
 
 #endpoint Tela de Aceite do Termo
-
 @app.route("/termos_texto", methods=["GET"])
 def obter_termo_texto():
     termo = db.termos_texto.find_one(sort=[("data_publicacao", -1)])
     if termo:
         return jsonify({
-            "titulo": termo["titulo"],
-            "conteudo_html": termo["conteudo_html"],
-            "versao": termo["versao"],
-            "data_publicacao": termo["data_publicacao"].isoformat()
+            "titulo": termo.get("titulo"),
+            "conteudo_html": termo.get("conteudo_html"),
+            "versao": termo.get("versao"),
+            "data_publicacao": termo.get("data_publicacao").isoformat()
         }), 200
     return jsonify({"erro": "Termo de uso não encontrado."}), 404
 
@@ -367,6 +366,7 @@ def aceitar_termo_uso():
 
     db.termos_uso.insert_one(termo)
     return jsonify({"mensagem": "Termo de uso aceito e registrado."}), 201
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

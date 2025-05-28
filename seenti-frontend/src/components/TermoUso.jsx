@@ -9,18 +9,23 @@ function TermoUso({ usuarioId, onTermoAceito }) {
   useEffect(() => {
     fetch('http://127.0.0.1:5000/termos_texto')
       .then((res) => res.json())
-      .then((data) => setTermoTexto(data.texto || ''))
+      .then((data) => setTermoTexto(data.conteudo_html || 'Texto do termo indisponível.'))
       .catch((err) => console.error('Erro ao carregar termo:', err));
   }, []);
-
+ 
   const handleAceite = async () => {
+    if (!usuarioId) {
+      alert('Erro: ID do usuário não está disponível.');
+      return;
+    }
+  
     try {
       const response = await fetch('http://127.0.0.1:5000/termos_uso', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario_id: usuarioId, aceito_termo: true })
+        body: JSON.stringify({ usuario_id: usuarioId, aceito: true }) // corrigido "aceito" ao invés de "aceito_termo"
       });
-
+  
       const data = await response.json();
       if (response.ok) {
         alert(data.mensagem || 'Termo aceito com sucesso.');
@@ -33,7 +38,7 @@ function TermoUso({ usuarioId, onTermoAceito }) {
       alert('Erro de conexão ao aceitar termo.');
     }
   };
-
+  
   return (
     <div className="termo-container">
       <h2>Termo de Uso e Política de Privacidade</h2>

@@ -40,8 +40,8 @@ function App() {
         />
       )}
       {tela === 'termo' && (
-        <TermoUso usuarioId={usuarioId} onTermoAceito={handleAceiteTermo} />
-      )}
+         <TermoUso usuarioId={usuarioId} onTermoAceito={handleAceiteTermo} />
+             )}
       {tela === 'cliente' && <CadastroCliente usuarioId={usuarioId} />}
       {tela === 'boas-vindas' && <TelaBoasVindas />}
     </div>
