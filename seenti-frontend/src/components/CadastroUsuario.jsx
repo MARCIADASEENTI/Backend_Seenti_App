@@ -70,3 +70,4 @@ function CadastroUsuario({ onCadastroSucesso }) {
 }
 
 export default CadastroUsuario;
+

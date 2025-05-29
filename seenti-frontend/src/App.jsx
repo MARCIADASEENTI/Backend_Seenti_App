@@ -1,49 +1,67 @@
-import { useState } from 'react';
+// src/App.jsx
+import React, { useState } from 'react';
 import CadastroUsuario from './components/CadastroUsuario';
-import Login from './components/Login';
 import TermoUso from './components/TermoUso';
 import CadastroCliente from './components/CadastroCliente';
 import TelaBoasVindas from './components/TelaBoasVindas';
+import './components/CadastroUsuario.css';
+import './components/TermoUso.css';
+import './components/CadastroCliente.css';
+import './components/TelaBoasVindas.css';
 
 function App() {
-  const [tela, setTela] = useState('cadastro');
-  const [usuarioId, setUsuarioId] = useState(null);
-  const [termoAceito, setTermoAceito] = useState(false);
+  const [etapa, setEtapa] = useState('cadastro_usuario');
+  const [usuarioId, setUsuarioId] = useState('');
 
-  const handleCadastroSucesso = () => {
-    setTela('login');
-  };
-
-  const handleLoginSucesso = (id) => {
+  const handleCadastroSucesso = (id) => {
     setUsuarioId(id);
-    setTermoAceito(true);
-    setTela('cliente');
-  };
-
-  const navegarParaTermo = (id) => {
-    setUsuarioId(id);
-    setTela('termo');
+    setEtapa('termo');
   };
 
   const handleAceiteTermo = () => {
-    setTermoAceito(true);
-    setTela('cliente');
+    setEtapa('boas_vindas_termo');
+    setTimeout(() => {
+      setEtapa('cadastro_cliente');
+    }, 2000); // Mostra a tela de boas-vindas por 2s
+  };
+
+  const handleCadastroClienteFinalizado = () => {
+    setEtapa('boas_vindas_final');
+  };
+
+  const handleAvancar = () => {
+    // Aqui você pode redirecionar para outra etapa, dashboard, login, etc.
+    alert('Você está pronta para começar. Em breve você será direcionada para o app!');
   };
 
   return (
     <div className="App">
-      {tela === 'cadastro' && <CadastroUsuario onCadastroSucesso={handleCadastroSucesso} />}
-      {tela === 'login' && (
-        <Login
-          onLoginSucesso={handleLoginSucesso}
-          navegarParaTermo={navegarParaTermo}
+      {etapa === 'cadastro_usuario' && (
+        <CadastroUsuario onCadastroSucesso={handleCadastroSucesso} />
+      )}
+
+      {etapa === 'termo' && (
+        <TermoUso usuarioId={usuarioId} onTermoAceito={handleAceiteTermo} />
+      )}
+
+      {etapa === 'boas_vindas_termo' && (
+        <div className="boas-vindas">
+          <h2>🎉 Seja bem-vinda ao Projeto Seenti!</h2>
+          <p>Seu cadastro foi realizado com sucesso.</p>
+          <p>Agora vamos completar suas informações pessoais.</p>
+        </div>
+      )}
+
+      {etapa === 'cadastro_cliente' && (
+        <CadastroCliente
+          usuarioId={usuarioId}
+          onCadastroFinalizado={handleCadastroClienteFinalizado}
         />
       )}
-      {tela === 'termo' && (
-         <TermoUso usuarioId={usuarioId} onTermoAceito={handleAceiteTermo} />
-             )}
-      {tela === 'cliente' && <CadastroCliente usuarioId={usuarioId} />}
-      {tela === 'boas-vindas' && <TelaBoasVindas />}
+
+      {etapa === 'boas_vindas_final' && (
+        <TelaBoasVindas onAvancar={handleAvancar} />
+      )}
     </div>
   );
 }

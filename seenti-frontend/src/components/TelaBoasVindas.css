@@ -1,40 +1,21 @@
+/* src/components/TelaBoasVindas.css */
 .boas-vindas-container {
-    max-width: 400px;
-    margin: 60px auto;
-    padding: 30px;
-    background-color: #f8f8f8;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
-    text-align: center;
-    font-family: Arial, sans-serif;
-  }
-  
-  .boas-vindas-container h1 {
-    color: #1d3557;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-  }
-  
-  .boas-vindas-container p {
-    font-size: 1rem;
-    color: #444;
-    margin-bottom: 15px;
-  }
-  
-  .boas-vindas-container button {
-    margin-top: 10px;
-    padding: 10px 25px;
-    font-size: 1rem;
-    background-color: #457b9d;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .boas-vindas-container button:hover {
-    background-color: #1d3557;
-  }
-  
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  text-align: center;
+  background: #e7f8f0;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+}
+.boas-vindas-container h1 {
+  font-size: 24px;
+}
+.boas-vindas-container p {
+  margin-top: 0.5rem;
+}
+.boas-vindas-container button {
+  margin-top: 2rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 16px;
+}
