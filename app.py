@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from flask_bcrypt import Bcrypt
@@ -6,23 +7,18 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from datetime import datetime
 import os
-import bcrypt
 
 app = Flask(__name__)
-CORS(app)
 
-# 🟢 Carrega as variáveis do .env
+# Configuração CORS correta
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+
 load_dotenv()
-
-# 🟢 Carrega o URI do .env
-
 bcrypt = Bcrypt(app)
 
-# Configuração do MongoDB Atlas
-app.config["MONGO_URI"] = os.getenv("MONGO_URI", "sua_connection_string_aqui")
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 mongo = PyMongo(app)
 db = mongo.db
-
 @app.route("/usuarios", methods=["POST"])
 def cadastrar_usuario():
     data = request.get_json()
@@ -31,11 +27,9 @@ def cadastrar_usuario():
     senha = data.get("senha")
     consentimento = data.get("consentimento", False)
 
-    # Validação básica
     if not all([email, senha]) or not consentimento:
         return jsonify({"erro": "Dados incompletos ou consentimento não aceito."}), 400
 
-    # Verificar se já existe
     if db.usuarios.find_one({"email": email}):
         return jsonify({"erro": "Usuário com este e-mail já existe."}), 409
 
@@ -53,9 +47,6 @@ def cadastrar_usuario():
         "mensagem": "Usuário cadastrado com sucesso!",
         "usuario_id": str(resultado.inserted_id)
     }), 201
-
-
-### 
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -370,5 +361,4 @@ def aceitar_termo_uso():
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
-
 
