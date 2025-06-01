@@ -17,19 +17,15 @@ function CadastroCliente({ usuarioId, onCadastroFinalizado }) {
       uf: '',
       cep: '',
       caixa_postal: '',
-    },
+    }
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name in form.endereco) {
       setForm((prev) => ({
         ...prev,
-        endereco: {
-          ...prev.endereco,
-          [name]: value,
-        },
+        endereco: { ...prev.endereco, [name]: value }
       }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
@@ -38,11 +34,7 @@ function CadastroCliente({ usuarioId, onCadastroFinalizado }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      usuario_id: usuarioId,
-      ...form,
-    };
+    const payload = { ...form, usuario_id: usuarioId };
 
     try {
       const response = await fetch('http://127.0.0.1:5000/clientes', {
@@ -52,42 +44,43 @@ function CadastroCliente({ usuarioId, onCadastroFinalizado }) {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         alert(data.mensagem);
-        onCadastroFinalizado();
+        onCadastroFinalizado(payload); // Envia os dados do cliente
       } else {
         alert(data.erro || 'Erro ao cadastrar cliente.');
       }
     } catch (error) {
       console.error('Erro ao cadastrar cliente:', error);
-      alert('Erro ao cadastrar cliente.');
+      alert('Erro de conexão.');
     }
   };
 
   return (
-    <div className="cadastro-cliente-container">
-      <h2>Cadastro de Cliente</h2>
-      <form onSubmit={handleSubmit} className="cadastro-form">
-        <label>
-          Nome Completo:
+    <div className="cliente-container">
+      <h2>Cadastro do Cliente</h2>
+      <form className="cliente-form" onSubmit={handleSubmit}>
+        <div className="input-group">
+          <label>Nome completo:</label>
           <input type="text" name="nome_completo" value={form.nome_completo} onChange={handleChange} required />
-        </label>
-        <label>
-          Telefone:
-          <input type="text" name="telefone" value={form.telefone} onChange={handleChange} />
-        </label>
-        <label>
-          Data de Nascimento:
-          <input type="date" name="data_nascimento" value={form.data_nascimento} onChange={handleChange} />
-        </label>
+        </div>
+
+        <div className="input-group">
+          <label>Telefone:</label>
+          <input type="text" name="telefone" value={form.telefone} onChange={handleChange} required />
+        </div>
+
+        <div className="input-group">
+          <label>Data de nascimento:</label>
+          <input type="date" name="data_nascimento" value={form.data_nascimento} onChange={handleChange} required />
+        </div>
 
         <h3>Endereço</h3>
-        {['rua', 'numero', 'complemento', 'bairro', 'cidade', 'estado', 'uf', 'cep', 'caixa_postal'].map((campo) => (
-          <label key={campo}>
-            {campo.charAt(0).toUpperCase() + campo.slice(1)}:
-            <input type="text" name={campo} value={form.endereco[campo]} onChange={handleChange} />
-          </label>
+        {Object.entries(form.endereco).map(([key, value]) => (
+          <div className="input-group" key={key}>
+            <label>{key.replace('_', ' ')}:</label>
+            <input type="text" name={key} value={value} onChange={handleChange} />
+          </div>
         ))}
 
         <button type="submit">Salvar</button>
