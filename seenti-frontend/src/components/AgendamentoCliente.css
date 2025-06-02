@@ -1,50 +1,49 @@
 .agendamento-container {
-    padding: 30px 20px;
-    background-color: #f4f4f4;
-    min-height: 100vh;
-    font-family: sans-serif;
-    color: #021735;
-  }
-  
-  .agendamento-container h2 {
-    text-align: center;
-    color: #021735;
-    margin-bottom: 30px;
-  }
-  
-  .agendamento-form {
-    max-width: 500px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .agendamento-form label {
-    display: flex;
-    flex-direction: column;
-    font-weight: bold;
-  }
-  
-  .agendamento-form input,
-  .agendamento-form select {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    margin-top: 5px;
-    font-size: 14px;
-  }
-  
-  .agendamento-form button {
-    padding: 10px 20px;
-    background-color: #20d3e2;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .agendamento-form button:hover {
-    background-color: #85b4f5;
-  }
-  
+  padding: 30px 20px;
+  background-color: #f4f4f4;
+  min-height: 100vh;
+  font-family: sans-serif;
+  color: #021735;
+}
+
+.agendamento-container h2 {
+  text-align: center;
+  color: #021735;
+  margin-bottom: 30px;
+}
+
+.agendamento-form {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.agendamento-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.agendamento-form input,
+.agendamento-form select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.agendamento-form button {
+  padding: 10px 20px;
+  background-color: #20d3e2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.agendamento-form button:hover {
+  background-color: #85b4f5;
+}

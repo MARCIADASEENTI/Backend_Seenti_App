@@ -1,81 +1,78 @@
 // src/App.jsx
-import React, { useState } from 'react';
-import CadastroUsuario from './components/CadastroUsuario';
-import TermoUso from './components/TermoUso';
-import CadastroCliente from './components/CadastroCliente';
-import PaginaCliente from './components/PaginaCliente';
-import AnamneseCliente from './components/AnamneseCliente';
-import AgendamentoCliente from './components/AgendamentoCliente';
-import './App.css';
+import React, { useState } from "react";
+import CadastroUsuario from "./components/CadastroUsuario";
+import Login from "./components/Login";
+import TermoUso from "./components/TermoUso";
+import CadastroCliente from "./components/CadastroCliente";
+import BoasVindasCliente from "./components/BoasVindasCliente";
+import PaginaCliente from "./components/PaginaCliente";
+import AnamneseCliente from "./components/AnamneseCliente";
+import "./App.css";
 
 function App() {
-  const [pagina, setPagina] = useState('cadastroUsuario');
+  const [pagina, setPagina] = useState("cadastro"); // primeira página
   const [usuarioId, setUsuarioId] = useState(null);
   const [clienteId, setClienteId] = useState(null);
-  const [dadosCliente, setDadosCliente] = useState(null);
 
-  // Após cadastro do usuário
-  const handleCadastroUsuario = (id) => {
+  const handleCadastroSucesso = (id) => {
     setUsuarioId(id);
-    setPagina('termoUso');
+    setPagina("login");
   };
 
-  // Após aceite do termo
-  const handleAceiteTermo = () => {
-    setPagina('cadastroCliente');
+  const handleLoginSucesso = (id) => {
+    setUsuarioId(id);
+    setPagina("termo");
   };
 
-  // Após cadastro do cliente
-  const handleCadastroCliente = (cliente) => {
-    setClienteId(cliente.id);
-    setDadosCliente(cliente);
-    setPagina('cliente');
+  const handleTermoAceito = () => {
+    setPagina("cadastroCliente");
   };
 
-  // Retorno da anamnese para a página do cliente
-  const handleVoltarParaCliente = () => {
-    setPagina('cliente');
+  const handleClienteCadastrado = (id) => {
+    setClienteId(id);
+    setPagina("boasVindas");
+  };
+
+  const handleIrParaPaginaCliente = () => {
+    setPagina("paginaCliente");
+  };
+
+  const handleAbrirAnamnese = () => {
+    setPagina("anamnese");
   };
 
   return (
-    <div className="app-container">
-      {pagina === 'cadastroUsuario' && (
-        <CadastroUsuario onCadastroSucesso={handleCadastroUsuario} />
+    <div className="App">
+      {pagina === "cadastro" && (
+        <CadastroUsuario onCadastroSucesso={handleCadastroSucesso} />
       )}
-
-      {pagina === 'termoUso' && (
-        <TermoUso usuarioId={usuarioId} onTermoAceito={handleAceiteTermo} />
-      )}
-
-      {pagina === 'cadastroCliente' && (
-        <CadastroCliente usuarioId={usuarioId} onCadastroFinalizado={handleCadastroCliente} />
-      )}
-
-      {pagina === 'cliente' && dadosCliente && (
-        <PaginaCliente
-          cliente={dadosCliente}
-          onPreencherAnamnese={() => setPagina('anamnese')}
-          onAgendar={() => setPagina('agendamento')}
+      {pagina === "login" && (
+        <Login
+          onLoginSucesso={handleLoginSucesso}
+          navegarParaTermo={() => setPagina("termo")}
         />
       )}
-
-      {pagina === 'anamnese' && clienteId && (
-        <AnamneseCliente clienteId={clienteId} onVoltar={handleVoltarParaCliente} />
+      {pagina === "termo" && (
+        <TermoUso usuarioId={usuarioId} onTermoAceito={handleTermoAceito} />
       )}
-
-      {pagina === 'agendamento' && clienteId && (
-        <AgendamentoCliente clienteId={clienteId} onAgendamentoConcluido={handleVoltarParaCliente} />
+      {pagina === "cadastroCliente" && (
+        <CadastroCliente
+          usuarioId={usuarioId}
+          onCadastroFinalizado={handleClienteCadastrado}
+        />
       )}
-      {pagina === 'anamnese' && (
-  <AnamneseCliente cliente={dadosCliente} onVoltar={() => setPagina('cliente')} />
-)}
-{pagina === 'anamnese' && (
-  <AnamneseCliente
-    cliente={dadosCliente}
-    onVoltar={() => setPagina('cliente')}
-  />
-)}
-
+      {pagina === "boasVindas" && (
+        <BoasVindasCliente onAvancar={handleIrParaPaginaCliente} />
+      )}
+      {pagina === "paginaCliente" && (
+        <PaginaCliente
+          clienteId={clienteId}
+          onPreencherAnamnese={handleAbrirAnamnese}
+        />
+      )}
+      {pagina === "anamnese" && (
+        <AnamneseCliente clienteId={clienteId} onVoltar={handleIrParaPaginaCliente} />
+      )}
     </div>
   );
 }

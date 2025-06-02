@@ -1,13 +1,12 @@
+// src/components/AnamneseCliente.jsx
 import React, { useState } from 'react';
 import './AnamneseCliente.css';
 
-function AnamneseCliente({ cliente, onVoltar }) {
+function AnamneseCliente({ clienteId, onVoltar }) {
   const [form, setForm] = useState({
-    cliente_id: cliente?.id || '',
-    terapia_id: '', // será melhorado futuramente
-    queixa_principal: '',
     identificacao: '',
-    observacoes_finais: ''
+    queixa_principal: '',
+    observacoes_finais: '',
   });
 
   const handleChange = (e) => {
@@ -18,61 +17,62 @@ function AnamneseCliente({ cliente, onVoltar }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      cliente_id: clienteId,
+      identificacao: form.identificacao,
+      queixa_principal: form.queixa_principal,
+      observacoes_finais: form.observacoes_finais,
+    };
+
     try {
       const response = await fetch('http://127.0.0.1:5000/anamneses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
+
       if (response.ok) {
-        alert(data.mensagem || 'Anamnese salva com sucesso!');
-        onVoltar();
+        alert(data.mensagem || 'Anamnese enviada com sucesso!');
+        onVoltar(); // volta à página do cliente
       } else {
-        alert(data.erro || 'Erro ao salvar anamnese.');
+        alert(data.erro || 'Erro ao enviar anamnese.');
       }
     } catch (error) {
       console.error('Erro ao enviar anamnese:', error);
-      alert('Erro de conexão ao enviar anamnese.');
+      alert('Erro ao conectar com o servidor.');
     }
   };
 
   return (
     <div className="anamnese-container">
-      <h2>Anamnese</h2>
-      <form onSubmit={handleSubmit} className="anamnese-form">
-        <label>
-          Identificação:
-          <input
-            type="text"
-            name="identificacao"
-            value={form.identificacao}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Queixa Principal:
-          <textarea
-            name="queixa_principal"
-            value={form.queixa_principal}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Observações Finais:
-          <textarea
-            name="observacoes_finais"
-            value={form.observacoes_finais}
-            onChange={handleChange}
-          />
-        </label>
-        <div className="anamnese-botoes">
-          <button type="submit">Enviar</button>
-          <button type="button" onClick={onVoltar}>Voltar</button>
-        </div>
+      <h2>Preenchimento de Anamnese</h2>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          name="identificacao"
+          placeholder="Identificação"
+          value={form.identificacao}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="queixa_principal"
+          placeholder="Queixa principal"
+          value={form.queixa_principal}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="observacoes_finais"
+          placeholder="Observações finais"
+          value={form.observacoes_finais}
+          onChange={handleChange}
+        />
+        <button type="submit">Enviar</button>
+        <button type="button" onClick={onVoltar}>
+          Voltar
+        </button>
       </form>
     </div>
   );

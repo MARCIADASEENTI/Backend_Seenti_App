@@ -1,58 +1,34 @@
 // src/components/PaginaCliente.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import './PaginaCliente.css';
 
-function PaginaCliente({ cliente, onPreencherAnamnese, onAgendar }) {
-  const [mostrarFerramentas, setMostrarFerramentas] = useState(false);
-
+function PaginaCliente({ clienteId, onPreencherAnamnese }) {
   return (
     <div className="pagina-cliente-container">
-      <header>
-        <h2>Bem-vinda, {cliente?.nome_completo || 'Cliente'}!</h2>
-        <p>Sua nova jornada terapêutica começa agora 💫</p>
+      <header className="cliente-header">
+        <h1>🎉 Bem-vinda!</h1>
+        <p>Você já pode iniciar seu acompanhamento terapêutico.</p>
       </header>
 
-      <div className="top-icons">
-        {/* Ícone de Configurações */}
-        <div className="icone-config" title="Configurações">
-          ⚙️
-        </div>
+      <div className="cliente-acoes">
+        <button className="btn-anamnese" onClick={onPreencherAnamnese}>
+          Preencher Anamnese
+        </button>
 
-        {/* Ícone de Ferramentas */}
-        <div
-          className="icone-ferramentas"
-          title="Ferramentas"
-          onClick={() => setMostrarFerramentas(!mostrarFerramentas)}
-        >
-          🔧
-        </div>
+        <button className="btn-agenda" disabled>
+          Ver Agenda (em breve)
+        </button>
 
-        {/* Ícone de Perfil */}
-        <div className="icone-perfil" title="Meu perfil">
-          <img
-            src="/foto-perfil-default.png"
-            alt="Perfil"
-            className="foto-perfil"
-          />
-        </div>
-      </div>
+        <button className="btn-configuracoes" disabled>
+          Configurações (em breve)
+        </button>
 
-      {/* Menu de Ferramentas */}
-      {mostrarFerramentas && (
-        <div className="menu-ferramentas">
-          <button onClick={onPreencherAnamnese}>🧾 Anamnese</button>
-          <button onClick={onAgendar}>📅 Agendamento</button>
-          <button disabled>📚 Outras ferramentas</button>
-        </div>
-      )}
-
-      <div className="assistente-ia" title="Assistente Virtual">
-        🤖 Assistente IA em breve...
+        <button className="btn-ia" disabled>
+          Assistente IA (em breve)
+        </button>
       </div>
     </div>
   );
 }
 
 export default PaginaCliente;
-
-
