@@ -1,40 +1,33 @@
-.boas-vindas-cliente-container {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 30px;
-    background-color: #f1f9f9;
-    border: 1px solid #cce3e3;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-    text-align: center;
-    font-family: 'Segoe UI', sans-serif;
-  }
-  
-  .boas-vindas-cliente-container h1 {
-    color: #1b4965;
-    font-size: 1.6rem;
-    margin-bottom: 15px;
-  }
-  
-  .boas-vindas-cliente-container p {
-    color: #3a3a3a;
-    margin: 10px 0;
-    font-size: 1rem;
-  }
-  
-  .boas-vindas-cliente-container button {
-    margin-top: 20px;
-    padding: 10px 25px;
-    font-size: 1rem;
-    background-color: #1b4965;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .boas-vindas-cliente-container button:hover {
-    background-color: #123752;
-  }
-  
+.anamnese-container {
+  padding: 2rem;
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.anamnese-form label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.anamnese-form input,
+.anamnese-form textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.anamnese-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.anamnese-botoes {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}

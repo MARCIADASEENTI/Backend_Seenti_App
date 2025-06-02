@@ -66,6 +66,16 @@ function App() {
       {pagina === 'agendamento' && clienteId && (
         <AgendamentoCliente clienteId={clienteId} onAgendamentoConcluido={handleVoltarParaCliente} />
       )}
+      {pagina === 'anamnese' && (
+  <AnamneseCliente cliente={dadosCliente} onVoltar={() => setPagina('cliente')} />
+)}
+{pagina === 'anamnese' && (
+  <AnamneseCliente
+    cliente={dadosCliente}
+    onVoltar={() => setPagina('cliente')}
+  />
+)}
+
     </div>
   );
 }
