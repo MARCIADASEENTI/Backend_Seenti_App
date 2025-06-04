@@ -13,8 +13,6 @@ function App() {
   const [usuarioId, setUsuarioId] = useState(null);
   const [clienteId, setClienteId] = useState(null);
 
-  const irParaLogin = () => setPagina("login");
-
   return (
     <div>
       {pagina === "cadastroUsuario" && (
@@ -45,8 +43,8 @@ function App() {
       {pagina === "cadastroCliente" && (
         <CadastroCliente
           usuarioId={usuarioId}
-          onCadastroFinalizado={(idCliente) => {
-            setClienteId(idCliente);
+          onCadastroFinalizado={(clienteID) => {
+            setClienteId(clienteID);
             setPagina("boasVindas");
           }}
         />

@@ -1,9 +1,8 @@
-// src/components/PaginaCliente.jsx
 import React from 'react';
 import './PaginaCliente.css';
 import { FaTools, FaUserCog, FaRobot } from 'react-icons/fa';
 
-function PaginaCliente({ clienteId, onAbrirAnamnese, onAbrirAgendamento }) {
+function PaginaCliente({ clienteId, onPreencherAnamnese, onAgendar }) {
   return (
     <div className="pagina-cliente">
       <h1>👏 Bem-vinda à sua página!</h1>
@@ -11,11 +10,11 @@ function PaginaCliente({ clienteId, onAbrirAnamnese, onAbrirAgendamento }) {
       <p>Escolha abaixo:</p>
 
       <div className="icones-container">
-        <div className="icone-item ativo" onClick={onAbrirAnamnese}>
+        <div className="icone-item ativo" onClick={onPreencherAnamnese}>
           <FaTools size={40} />
           <p>Anamnese</p>
         </div>
-        <div className="icone-item ativo" onClick={onAbrirAgendamento}>
+        <div className="icone-item ativo" onClick={onAgendar}>
           <FaTools size={40} />
           <p>Agendamento</p>
         </div>

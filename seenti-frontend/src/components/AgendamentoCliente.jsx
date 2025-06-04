@@ -58,7 +58,7 @@ function AgendamentoCliente({ clienteId, onVoltar }) {
           <input type="time" name="horario" value={form.horario} onChange={handleChange} required />
         </label>
         <label>
-          Motivo do Agendamento:
+          Motivo:
           <textarea name="motivo" value={form.motivo} onChange={handleChange} required />
         </label>
         <div className="botoes">

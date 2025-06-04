@@ -364,14 +364,15 @@ def agendar():
     try:
         agendamento = {
             "cliente_id": ObjectId(data["cliente_id"]),
-            "terapia_id": ObjectId(data["terapia_id"]),
             "data": data["data"],
-            "horario": data["horario"]
+            "horario": data["horario"],
+            "motivo": data.get("motivo", "")
         }
         db.agendamentos.insert_one(agendamento)
         return jsonify({"mensagem": "Agendamento salvo!"}), 201
     except Exception as e:
         return jsonify({"erro": str(e)}), 400
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
