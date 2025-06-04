@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from flask_bcrypt import Bcrypt
@@ -135,21 +134,18 @@ def cadastrar_terapia():
 def cadastrar_anamnese():
     data = request.get_json()
 
-    # Validações básicas
+    # Validação obrigatória
     cliente_id = data.get("cliente_id")
-    terapia_id = data.get("terapia_id")
+    if not cliente_id:
+        return jsonify({"erro": "cliente_id é obrigatório."}), 400
 
-    if not cliente_id or not terapia_id:
-        return jsonify({"erro": "cliente_id e terapia_id são obrigatórios."}), 400
-
-    # Converte IDs para ObjectId
+    # Converte o cliente_id para ObjectId
     try:
         data["cliente_id"] = ObjectId(cliente_id)
-        data["terapia_id"] = ObjectId(terapia_id)
     except Exception:
-        return jsonify({"erro": "IDs inválidos."}), 400
+        return jsonify({"erro": "cliente_id inválido."}), 400
 
-    # Data atual se não for passada
+    # Usa a data atual se não for fornecida
     if "data" not in data:
         data["data"] = datetime.utcnow()
     else:
@@ -158,6 +154,10 @@ def cadastrar_anamnese():
         except ValueError:
             return jsonify({"erro": "Formato da data deve ser YYYY-MM-DD."}), 400
 
+    # Remove terapia_id, se existir no payload por engano
+    data.pop("terapia_id", None)
+
+    # Insere a anamnese no banco
     db.anamneses.insert_one(data)
     return jsonify({"mensagem": "Anamnese cadastrada com sucesso!"}), 201
 

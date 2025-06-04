@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState } from "react";
 import CadastroUsuario from "./components/CadastroUsuario";
 import Login from "./components/Login";
@@ -7,71 +6,76 @@ import CadastroCliente from "./components/CadastroCliente";
 import BoasVindasCliente from "./components/BoasVindasCliente";
 import PaginaCliente from "./components/PaginaCliente";
 import AnamneseCliente from "./components/AnamneseCliente";
-import "./App.css";
+import AgendamentoCliente from "./components/AgendamentoCliente";
 
 function App() {
-  const [pagina, setPagina] = useState("cadastro"); // primeira página
+  const [pagina, setPagina] = useState("cadastroUsuario");
   const [usuarioId, setUsuarioId] = useState(null);
   const [clienteId, setClienteId] = useState(null);
 
-  const handleCadastroSucesso = (id) => {
-    setUsuarioId(id);
-    setPagina("login");
-  };
-
-  const handleLoginSucesso = (id) => {
-    setUsuarioId(id);
-    setPagina("termo");
-  };
-
-  const handleTermoAceito = () => {
-    setPagina("cadastroCliente");
-  };
-
-  const handleClienteCadastrado = (id) => {
-    setClienteId(id);
-    setPagina("boasVindas");
-  };
-
-  const handleIrParaPaginaCliente = () => {
-    setPagina("paginaCliente");
-  };
-
-  const handleAbrirAnamnese = () => {
-    setPagina("anamnese");
-  };
+  const irParaLogin = () => setPagina("login");
 
   return (
-    <div className="App">
-      {pagina === "cadastro" && (
-        <CadastroUsuario onCadastroSucesso={handleCadastroSucesso} />
-      )}
-      {pagina === "login" && (
-        <Login
-          onLoginSucesso={handleLoginSucesso}
-          navegarParaTermo={() => setPagina("termo")}
+    <div>
+      {pagina === "cadastroUsuario" && (
+        <CadastroUsuario
+          onCadastroSucesso={(id) => {
+            setUsuarioId(id);
+            setPagina("login");
+          }}
         />
       )}
-      {pagina === "termo" && (
-        <TermoUso usuarioId={usuarioId} onTermoAceito={handleTermoAceito} />
+
+      {pagina === "login" && (
+        <Login
+          onLoginSucesso={(id) => {
+            setUsuarioId(id);
+            setPagina("termo");
+          }}
+        />
       )}
+
+      {pagina === "termo" && (
+        <TermoUso
+          usuarioId={usuarioId}
+          onTermoAceito={() => setPagina("cadastroCliente")}
+        />
+      )}
+
       {pagina === "cadastroCliente" && (
         <CadastroCliente
           usuarioId={usuarioId}
-          onCadastroFinalizado={handleClienteCadastrado}
+          onCadastroFinalizado={(idCliente) => {
+            setClienteId(idCliente);
+            setPagina("boasVindas");
+          }}
         />
       )}
+
       {pagina === "boasVindas" && (
-        <BoasVindasCliente onAvancar={handleIrParaPaginaCliente} />
+        <BoasVindasCliente onAvancar={() => setPagina("paginaCliente")} />
       )}
+
       {pagina === "paginaCliente" && (
         <PaginaCliente
           clienteId={clienteId}
-          onPreencherAnamnese={handleAbrirAnamnese}
+          onPreencherAnamnese={() => setPagina("anamnese")}
+          onAgendar={() => setPagina("agendamento")}
         />
       )}
+
       {pagina === "anamnese" && (
-        <AnamneseCliente clienteId={clienteId} onVoltar={handleIrParaPaginaCliente} />
+        <AnamneseCliente
+          clienteId={clienteId}
+          onVoltar={() => setPagina("paginaCliente")}
+        />
+      )}
+
+      {pagina === "agendamento" && (
+        <AgendamentoCliente
+          clienteId={clienteId}
+          onVoltar={() => setPagina("paginaCliente")}
+        />
       )}
     </div>
   );

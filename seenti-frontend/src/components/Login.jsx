@@ -30,7 +30,7 @@ function Login({ onLoginSucesso, navegarParaTermo }) {
           onLoginSucesso(data.usuario_id);
         } else {
           alert('Você precisa aceitar os termos de uso antes de continuar.');
-          navegarParaTermo(data.usuario_id);
+        onLoginSucesso(data.usuario_id);
         }
       } else {
         setErro(data.erro || 'Erro ao realizar login.');
