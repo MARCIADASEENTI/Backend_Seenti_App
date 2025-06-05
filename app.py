@@ -133,26 +133,31 @@ def cadastrar_terapia():
 @app.route("/anamneses", methods=["POST"])
 def cadastrar_anamnese():
     data = request.get_json()
-
-    # Validação obrigatória
     cliente_id = data.get("cliente_id")
+
     if not cliente_id:
         return jsonify({"erro": "cliente_id é obrigatório."}), 400
 
-    # Converte o cliente_id para ObjectId
     try:
         data["cliente_id"] = ObjectId(cliente_id)
     except Exception:
         return jsonify({"erro": "cliente_id inválido."}), 400
 
-    # Usa a data atual se não for fornecida
+    # Adiciona data automática se não enviada
     if "data" not in data:
         data["data"] = datetime.utcnow()
     else:
         try:
             data["data"] = datetime.strptime(data["data"], "%Y-%m-%d")
         except ValueError:
-            return jsonify({"erro": "Formato da data deve ser YYYY-MM-DD."}), 400
+            return jsonify({"erro": "Formato de data inválido."}), 400
+
+    try:
+        db.anamneses.insert_one(data)
+        return jsonify({"mensagem": "Anamnese registrada com sucesso!"}), 201
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao registrar anamnese: {str(e)}"}), 500
+
 
     # Remove terapia_id, se existir no payload por engano
     data.pop("terapia_id", None)
@@ -373,6 +378,14 @@ def agendar():
     except Exception as e:
         return jsonify({"erro": str(e)}), 400
 
+@app.route("/anamneses/cliente/<cliente_id>", methods=["GET"])
+def verificar_anamnese_cliente(cliente_id):
+    try:
+        anamnese = db.anamneses.find_one({"cliente_id": ObjectId(cliente_id)})
+        return jsonify({"existe": bool(anamnese)}), 200
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao verificar anamnese: {str(e)}"}), 500
+    
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

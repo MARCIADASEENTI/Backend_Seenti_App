@@ -43,8 +43,8 @@ function App() {
       {pagina === "cadastroCliente" && (
         <CadastroCliente
           usuarioId={usuarioId}
-          onCadastroFinalizado={(clienteID) => {
-            setClienteId(clienteID);
+          onCadastroFinalizado={(idCliente) => {
+            setClienteId(idCliente);
             setPagina("boasVindas");
           }}
         />
@@ -57,8 +57,8 @@ function App() {
       {pagina === "paginaCliente" && (
         <PaginaCliente
           clienteId={clienteId}
-          onPreencherAnamnese={() => setPagina("anamnese")}
-          onAgendar={() => setPagina("agendamento")}
+          onAbrirAnamnese={() => setPagina("anamnese")}
+          onAbrirAgendamento={() => setPagina("agendamento")}
         />
       )}
 

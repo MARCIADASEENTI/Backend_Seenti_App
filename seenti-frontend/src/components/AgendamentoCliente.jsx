@@ -1,73 +1,65 @@
-// src/components/AgendamentoCliente.jsx
-import React, { useState } from 'react';
-import './AgendamentoCliente.css';
+// src/components/PaginaCliente.jsx
+import React, { useEffect, useState } from 'react';
+import './PaginaCliente.css';
+import { FaTools, FaUserCog, FaRobot } from 'react-icons/fa';
 
-function AgendamentoCliente({ clienteId, onVoltar }) {
-  const [form, setForm] = useState({
-    data: '',
-    horario: '',
-    motivo: ''
-  });
+function PaginaCliente({ clienteId, onAbrirAnamnese, onAbrirAgendamento }) {
+  const [temAnamnese, setTemAnamnese] = useState(false);
+  const [carregando, setCarregando] = useState(true);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const payload = {
-      cliente_id: clienteId,
-      data: form.data,
-      horario: form.horario,
-      motivo: form.motivo
+  useEffect(() => {
+    const verificarAnamnese = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/clientes/${clienteId}/tem_anamnese`);
+        const data = await response.json();
+        setTemAnamnese(data.tem_anamnese);
+      } catch (error) {
+        console.error('Erro ao verificar anamnese:', error);
+      } finally {
+        setCarregando(false);
+      }
     };
 
-    try {
-      const response = await fetch("http://127.0.0.1:5000/agendamentos", {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Agendamento realizado com sucesso!");
-        onVoltar();
-      } else {
-        alert(data.erro || "Erro ao agendar.");
-      }
-    } catch (error) {
-      console.error("Erro ao agendar:", error);
-      alert("Erro de conexão com o servidor.");
+    if (clienteId) {
+      verificarAnamnese();
     }
-  };
+  }, [clienteId]);
 
   return (
-    <div className="agendamento-container">
-      <h2>Agendar Atendimento</h2>
-      <form className="agendamento-form" onSubmit={handleSubmit}>
-        <label>
-          Data:
-          <input type="date" name="data" value={form.data} onChange={handleChange} required />
-        </label>
-        <label>
-          Horário:
-          <input type="time" name="horario" value={form.horario} onChange={handleChange} required />
-        </label>
-        <label>
-          Motivo:
-          <textarea name="motivo" value={form.motivo} onChange={handleChange} required />
-        </label>
-        <div className="botoes">
-          <button type="button" onClick={onVoltar}>Voltar</button>
-          <button type="submit">Agendar</button>
+    <div className="pagina-cliente">
+      <h1>👏 Bem-vinda à sua página!</h1>
+      <p>Você já pode iniciar seu acompanhamento terapêutico.</p>
+      <p>Escolha abaixo:</p>
+
+      <div className="icones-container">
+        <div className="icone-item ativo" onClick={onAbrirAnamnese}>
+          <FaTools size={40} />
+          <p>Anamnese</p>
         </div>
-      </form>
+
+        <div
+          className={`icone-item ${temAnamnese ? 'ativo' : 'inativo'}`}
+          onClick={temAnamnese ? onAbrirAgendamento : undefined}
+          title={!temAnamnese ? 'Preencha a anamnese antes de agendar' : ''}
+        >
+          <FaTools size={40} />
+          <p>Agendamento</p>
+        </div>
+
+        <div className="icone-item inativo">
+          <FaUserCog size={40} />
+          <p>Configurações</p>
+        </div>
+
+        <div className="icone-item inativo">
+          <FaRobot size={40} />
+          <p>Assistente IA</p>
+        </div>
+      </div>
+
+      {carregando && <p>Verificando informações...</p>}
     </div>
   );
 }
 
-export default AgendamentoCliente;
+export default PaginaCliente;

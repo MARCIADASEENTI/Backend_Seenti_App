@@ -11,7 +11,7 @@ fi
 
 # Adiciona alterações e faz o commit
 git add .
-git commit -m "Backup automático em $(date +'%Y-%m-%d %H:%M:%S')"
+git commit -m "Melhoria Anamnese mais completa em $(date +'%Y-%m-%d %H:%M:%S')"
 
 # Envia para o GitHub
 git push origin main

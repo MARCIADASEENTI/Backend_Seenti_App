@@ -1,55 +1,66 @@
 /* src/components/AnamneseCliente.css */
 .anamnese-container {
+  padding: 20px;
   background-color: #f4f4f4;
-  padding: 30px;
-  max-width: 600px;
-  margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: auto;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+}
+
+.anamnese-container h2 {
+  text-align: center;
+  color: #021735;
 }
 
 .anamnese-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
-.anamnese-form label {
-  display: flex;
-  flex-direction: column;
+.anamnese-form fieldset {
+  border: 1px solid #657082;
+  border-radius: 5px;
+  padding: 15px;
+  background-color: #fff;
+}
+
+.anamnese-form legend {
+  padding: 0 10px;
   font-weight: bold;
-  color: #021735;
+  color: #20D3e2;
 }
 
 .anamnese-form input,
 .anamnese-form textarea {
+  width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-size: 14px;
 }
 
 .anamnese-form textarea {
   resize: vertical;
-  min-height: 80px;
 }
 
 .botoes {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
 }
 
 .botoes button {
   padding: 10px 20px;
-  background-color: #85b4f5;
   border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
+  background-color: #20D3e2;
   color: white;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .botoes button:hover {
-  background-color: #20D3e2;
+  background-color: #85b4f5;
 }
