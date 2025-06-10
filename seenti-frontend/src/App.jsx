@@ -1,12 +1,20 @@
+// src/App.jsx
 import React, { useState } from "react";
-import CadastroUsuario from "./components/CadastroUsuario";
-import Login from "./components/Login";
-import TermoUso from "./components/TermoUso";
-import CadastroCliente from "./components/CadastroCliente";
-import BoasVindasCliente from "./components/BoasVindasCliente";
-import PaginaCliente from "./components/PaginaCliente";
-import AnamneseCliente from "./components/AnamneseCliente";
-import AgendamentoCliente from "./components/AgendamentoCliente";
+
+// COMPONENTES DO CLIENTE
+import CadastroUsuario from "./components/cliente/CadastroUsuario";
+import Login from "./components/cliente/Login";
+import TermoUso from "./components/cliente/TermoUso";
+import CadastroCliente from "./components/cliente/CadastroCliente";
+import BoasVindasCliente from "./components/cliente/BoasVindasCliente";
+import PaginaCliente from "./components/cliente/PaginaCliente";
+import AnamneseCliente from "./components/cliente/AnamneseCliente";
+import AgendamentoCliente from "./components/cliente/AgendamentoCliente";
+
+// COMPONENTES DO TERAPEUTA (ainda importados para uso futuro)
+import LoginTerapeuta from "./components/terapeuta/LoginTerapeuta";
+import PaginaTerapeuta from "./components/terapeuta/PaginaTerapeuta";
+import PainelTerapeuta from "./components/terapeuta/PainelTerapeuta";
 
 function App() {
   const [pagina, setPagina] = useState("cadastroUsuario");
@@ -15,6 +23,7 @@ function App() {
 
   return (
     <div>
+      {/* FLUXO CLIENTE */}
       {pagina === "cadastroUsuario" && (
         <CadastroUsuario
           onCadastroSucesso={(id) => {
@@ -75,6 +84,25 @@ function App() {
           onVoltar={() => setPagina("paginaCliente")}
         />
       )}
+
+      {/* FLUXO TERAPEUTA – se quiser testar depois */}
+      {/* 
+      {pagina === "loginTerapeuta" && (
+        <LoginTerapeuta
+          onLoginSucesso={(id) => {
+            setUsuarioId(id);
+            setPagina("paginaTerapeuta");
+          }}
+        />
+      )}
+
+      {pagina === "paginaTerapeuta" && (
+        <PaginaTerapeuta
+          terapeutaId={usuarioId}
+          onLogout={() => setPagina("loginTerapeuta")}
+        />
+      )}
+      */}
     </div>
   );
 }

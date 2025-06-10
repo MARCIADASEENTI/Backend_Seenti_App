@@ -9,8 +9,9 @@ import os
 
 app = Flask(__name__)
 
-# Configuração CORS correta
+# ✅ CORS configurado corretamente (mantém compatibilidade com frontend)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+
 
 load_dotenv()
 bcrypt = Bcrypt(app)
@@ -25,6 +26,7 @@ def cadastrar_usuario():
     email = data.get("email")
     senha = data.get("senha")
     consentimento = data.get("consentimento", False)
+    tipo_usuario = data.get("tipo_usuario", "C")  # padrão: cliente
 
     if not all([email, senha]) or not consentimento:
         return jsonify({"erro": "Dados incompletos ou consentimento não aceito."}), 400
@@ -37,7 +39,8 @@ def cadastrar_usuario():
     usuario = {
         "email": email,
         "senha": senha_hash,
-        "consentimento": consentimento
+        "consentimento": consentimento,
+        "tipo_usuario": tipo_usuario
     }
 
     resultado = db.usuarios.insert_one(usuario)
@@ -46,7 +49,6 @@ def cadastrar_usuario():
         "mensagem": "Usuário cadastrado com sucesso!",
         "usuario_id": str(resultado.inserted_id)
     }), 201
-
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -67,7 +69,6 @@ def login():
         "mensagem": "Login realizado com sucesso!",
         "usuario_id": str(usuario["_id"])
     }), 200
-
 
 @app.route("/clientes", methods=["POST"])
 def cadastrar_cliente():
