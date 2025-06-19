@@ -1,71 +1,64 @@
-// src/components/TermoUso.jsx
-import React, { useState, useEffect } from 'react';
-import './TermoUso.css';
+// src/components/cliente/TermoUso.jsx
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function TermoUso({ usuarioId, onTermoAceito }) {
-  const [termoTexto, setTermoTexto] = useState('');
-  const [aceito, setAceito] = useState(false);
+function TermoUso() {
+  const [termo, setTermo] = useState(null);
+  const navigate = useNavigate();
+  const usuarioId = localStorage.getItem("usuarioId");
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/termos_texto')
-      .then((res) => res.json())
-      .then((data) => {
-        setTermoTexto(data.conteudo_html || 'Texto do termo não disponível.');
-      })
-      .catch((err) => {
-        console.error('Erro ao carregar termo:', err);
-        setTermoTexto('Erro ao carregar o texto do termo.');
-      });
+    const carregarTermo = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/termos_texto");
+        const data = await response.json();
+        setTermo(data);
+      } catch (error) {
+        console.error("Erro ao carregar termo:", error);
+      }
+    };
+    carregarTermo();
   }, []);
 
-  const handleAceite = async () => {
+  const aceitarTermo = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/termos_uso', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario_id: usuarioId, aceito: true })
+      const response = await fetch("http://127.0.0.1:5000/termos_uso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario_id: usuarioId, aceito: true }),
       });
 
       const data = await response.json();
+
       if (response.ok) {
-        alert('✅ Boas-vindas! Agora complete seu cadastro de cliente.');
-        onTermoAceito(); // Redireciona para a próxima etapa
+        alert(data.mensagem);
+        navigate("/cadastro-cliente");
       } else {
-        alert(data.erro || 'Erro ao registrar aceite.');
+        alert(data.erro || "Erro ao registrar termo.");
       }
     } catch (error) {
-      console.error('Erro ao aceitar termo:', error);
-      alert('Erro de conexão ao aceitar termo.');
+      console.error("Erro ao aceitar termo:", error);
+      alert("Erro ao aceitar termo.");
     }
   };
 
+  if (!termo) return <p>Carregando termo de uso...</p>;
+
   return (
-    <div className="termo-container">
-      <h2>Termo de Uso e Política de Privacidade</h2>
-      <textarea
-        className="termo-textarea"
-        readOnly
-        value={termoTexto}
-        rows={12}
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-xl font-bold mb-4">{termo.titulo}</h1>
+      <div
+        className="prose max-w-none bg-white border p-4 rounded shadow-sm mb-6"
+        dangerouslySetInnerHTML={{ __html: termo.conteudo_html }}
       />
-      <label className="checkbox-label">
-        <input
-          type="checkbox"
-          checked={aceito}
-          onChange={(e) => setAceito(e.target.checked)}
-        />
-        Eu li e concordo com os termos acima
-      </label>
       <button
-        className="btn-termo"
-        onClick={handleAceite}
-        disabled={!aceito}
+        onClick={aceitarTermo}
+        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
       >
-        Li e aceito os termos
+        Aceitar Termo de Uso
       </button>
     </div>
   );
 }
 
 export default TermoUso;
-

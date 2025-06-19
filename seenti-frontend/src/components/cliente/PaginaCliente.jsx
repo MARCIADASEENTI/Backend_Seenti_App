@@ -1,69 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import './PaginaCliente.css';
-import { FaTools, FaUserCog, FaRobot } from 'react-icons/fa';
+// src/components/cliente/PaginaCliente.jsx
+import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-function PaginaCliente({ clienteId, onAbrirAnamnese, onAbrirAgendamento }) {
-  const [temAnamnese, setTemAnamnese] = useState(false);
-  const [carregando, setCarregando] = useState(true);
+function PaginaCliente() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const clienteId = location.state?.clienteId || localStorage.getItem("clienteId");
 
-  useEffect(() => {
-    const verificarAnamnese = async () => {
-      try {
-        const response = await fetch(`http://127.0.0.1:5000/anamneses/cliente/${clienteId}`);
-        const data = await response.json();
-        setTemAnamnese(data.existe);
-      } catch (error) {
-        console.error('Erro ao verificar anamnese:', error);
-      } finally {
-        setCarregando(false);
-      }
-    };
-
-    if (clienteId) {
-      verificarAnamnese();
-    }
-  }, [clienteId]);
+  const irParaAnamnese = () => {
+    navigate("/anamnese", { state: { clienteId } });
+  };
 
   return (
     <div className="pagina-cliente">
-      <h1>👏 Bem-vinda à sua página!</h1>
-      <p>Você já pode iniciar seu acompanhamento terapêutico.</p>
-      <p>Escolha abaixo:</p>
+      <h2>👤 Área do Cliente</h2>
+      <p>Seja bem-vindo! Escolha uma opção abaixo:</p>
 
-      <div className="icones-container">
-        <div className="icone-item ativo" onClick={onAbrirAnamnese}>
-          <FaTools size={40} />
-          <p>Anamnese</p>
-        </div>
-
-        <div
-          className={`icone-item ${temAnamnese ? 'ativo' : 'inativo'}`}
-          onClick={() => {
-            if (temAnamnese) {
-              console.log("Abrindo tela de agendamento...");
-              onAbrirAgendamento();
-            } else {
-              alert("Preencha a anamnese antes de agendar.");
-            }
-          }}
-          title={!temAnamnese ? 'Preencha a anamnese antes de agendar' : ''}
-        >
-          <FaTools size={40} />
-          <p>Agendamento</p>
-        </div>
-
-        <div className="icone-item inativo">
-          <FaUserCog size={40} />
-          <p>Configurações</p>
-        </div>
-
-        <div className="icone-item inativo">
-          <FaRobot size={40} />
-          <p>Assistente IA</p>
-        </div>
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={irParaAnamnese}>📝 Preencher Anamnese</button>
       </div>
-
-      {carregando && <p>Verificando informações...</p>}
     </div>
   );
 }

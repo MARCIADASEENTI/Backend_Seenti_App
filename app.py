@@ -6,6 +6,7 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from datetime import datetime
 import os
+from flask_bcrypt import check_password_hash
 
 app = Flask(__name__)
 
@@ -49,25 +50,26 @@ def cadastrar_usuario():
         "mensagem": "Usuário cadastrado com sucesso!",
         "usuario_id": str(resultado.inserted_id)
     }), 201
+
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     email = data.get("email")
     senha = data.get("senha")
 
-    if not email or not senha:
-        return jsonify({"erro": "Email e senha são obrigatórios."}), 400
-
     usuario = db.usuarios.find_one({"email": email})
-    if not usuario:
-        return jsonify({"erro": "Usuário não encontrado."}), 404
 
-    if not bcrypt.check_password_hash(usuario["senha"], senha):
-        return jsonify({"erro": "Senha incorreta."}), 401
+    if not usuario or not bcrypt.check_password_hash(usuario["senha"], senha):
+        return jsonify({"erro": "Credenciais inválidas"}), 401
+
+    termo_aceito = db.termos_uso.find_one({"usuario_id": usuario["_id"]})
 
     return jsonify({
         "mensagem": "Login realizado com sucesso!",
-        "usuario_id": str(usuario["_id"])
+        "usuario_id": str(usuario["_id"]),
+        "tipo_usuario": usuario.get("tipo_usuario", "C"),
+        "aceito_termo": bool(termo_aceito)
     }), 200
 
 @app.route("/clientes", methods=["POST"])
@@ -76,31 +78,35 @@ def cadastrar_cliente():
 
     try:
         usuario_id = data["usuario_id"]
-        nome_completo = data["nome_completo"]
+        primeiro_nome = data["primeiro_nome"]
+        sobrenome = data["sobrenome"]
+        nome_social = data.get("nome_social", "")
         telefone = data["telefone"]
         data_nascimento = data["data_nascimento"]
         endereco = data["endereco"]
 
         cliente = {
             "usuario_id": ObjectId(usuario_id),
-            "nome_completo": nome_completo,
+            "primeiro_nome": primeiro_nome,
+            "sobrenome": sobrenome,
+            "nome_social": nome_social,
             "telefone": telefone,
+            "cpf": data["cpf"],
             "data_nascimento": data_nascimento,
             "endereco": {
-                "rua": endereco.get("rua"),
-                "numero": endereco.get("numero"),
-                "complemento": endereco.get("complemento"),
-                "bairro": endereco.get("bairro"),
-                "cidade": endereco.get("cidade"),
-                "estado": endereco.get("estado"),
-                "uf": endereco.get("uf"),
-                "cep": endereco.get("cep"),
-                "caixa_postal": endereco.get("caixa_postal")
+                "rua": endereco.get("rua", ""),
+                "numero": endereco.get("numero", ""),
+                "complemento": endereco.get("complemento", ""),
+                "bairro": endereco.get("bairro", ""),
+                "cidade": endereco.get("cidade", ""),
+                "estado": endereco.get("estado", ""),  # opcional
+                "uf": endereco.get("uf", ""),
+                "cep": endereco.get("cep", ""),
+                "caixa_postal": endereco.get("caixa_postal", "")
             }
         }
 
         db.clientes.insert_one(cliente)
-
         return jsonify({"mensagem": "Cliente cadastrado com sucesso!"}), 201
 
     except Exception as e:

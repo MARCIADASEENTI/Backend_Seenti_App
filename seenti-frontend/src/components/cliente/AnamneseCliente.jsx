@@ -1,83 +1,47 @@
-// src/components/AnamneseCliente.jsx
-import React, { useState } from 'react';
-import './AnamneseCliente.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-function AnamneseCliente({ clienteId, onVoltar }) {
+function AnamneseCliente() {
+  const navigate = useNavigate();
+  const [clienteId, setClienteId] = useState(null);
   const [form, setForm] = useState({
     identificacao: {
-      nome_completo: '',
-      idade: '',
-      sexo: '',
-      profissao: '',
-      estado_civil: '',
-      escolaridade: '',
-      religiao: ''
+      nome_completo: "",
+      idade: "",
+      genero: "",
+      profissao: "",
     },
-    historico_clinico: {
-      doencas_cronicas: [''],
-      historico_familiar: [''],
-      internacoes_cirurgias: [''],
-      uso_medicamentos: [''],
-      alergias: ['']
-    },
-    sinais_vitais: {
-      pressao_arterial: '',
-      temperatura_corporal: '',
-      frequencia_cardiaca: ''
-    },
-    aspectos_psicossociais: {
-      interacao_familiar: '',
-      risco_isolamento_social: ''
-    },
-    aspectos_cognitivos_comportamentais: {
-      lapsos_memoria: '',
-      padroes_sono: '',
-      alteracoes_humor: ''
-    },
-    pensamentos_suicidas: {
-      resposta: '',
-      detalhes: ''
-    },
-    uso_alcool_drogas: {
-      resposta: '',
-      detalhes: ''
-    },
-    revisao_sistemas: {
-      cardiovascular: [''],
-      respiratorio: [''],
-      digestivo: [''],
-      neurologico: ['']
-    },
-    estilo_vida: {
-      alimentacao: '',
-      atividade_fisica: '',
-      habitos_sono: '',
-      estresse_ansiedade: ''
-    },
-    mulheres: {
-      historico_gestacoes: '',
-      uso_contraceptivos: '',
-      alteracoes_hormonais: ''
-    },
-    criancas_adolescentes: {
-      aleitamento_materno: '',
-      marcos_desenvolvimento: ''
-    },
-    imunizacoes: [],
-    queixa_principal: '',
-    observacoes_finais: ''
+    queixa_principal: "",
+    historico_familiar: "",
+    medicamentos_uso: "",
+    alergias: "",
+    observacoes_finais: ""
   });
 
-  const handleChange = (e, path) => {
+  useEffect(() => {
+    const id = localStorage.getItem("cliente_id");
+    if (!id) {
+      navigate("/login");
+    } else {
+      setClienteId(id);
+    }
+  }, [navigate]);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => {
-      const clone = JSON.parse(JSON.stringify(prev));
-      const keys = path ? path.split('.') : [name];
-      let current = clone;
-      keys.slice(0, -1).forEach(k => (current = current[k]));
-      current[keys.at(-1)] = value;
-      return clone;
-    });
+
+    if (name.startsWith("identificacao.")) {
+      const campo = name.split(".")[1];
+      setForm((prev) => ({
+        ...prev,
+        identificacao: {
+          ...prev.identificacao,
+          [campo]: value,
+        },
+      }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -85,76 +49,48 @@ function AnamneseCliente({ clienteId, onVoltar }) {
 
     const payload = {
       cliente_id: clienteId,
-      data: new Date().toISOString().split('T')[0],
-      ...form
+      ...form,
     };
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/anamneses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      const res = await fetch("http://127.0.0.1:5000/anamneses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (response.ok) {
-        alert('Anamnese registrada com sucesso!');
-        onVoltar();
+      if (res.ok) {
+        alert("Anamnese enviada com sucesso!");
+        navigate("/pagina-cliente");
       } else {
-        alert(data.erro || 'Erro ao salvar anamnese');
+        alert(data.erro || "Erro ao enviar anamnese.");
       }
-    } catch (error) {
-      console.error('Erro ao enviar anamnese:', error);
-      alert('Erro de conexão com o servidor.');
+    } catch (err) {
+      console.error("Erro ao enviar anamnese:", err);
+      alert("Erro ao conectar ao servidor.");
     }
   };
 
   return (
-    <div className="anamnese-container">
-      <h2>Formulário de Anamnese</h2>
-      <form className="anamnese-form" onSubmit={handleSubmit}>
+    <div className="max-w-2xl mx-auto mt-10 p-4 border rounded">
+      <h2 className="text-2xl font-bold mb-4">Anamnese</h2>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+        <input type="text" name="identificacao.nome_completo" placeholder="Nome completo" value={form.identificacao.nome_completo} onChange={handleChange} required />
+        <input type="number" name="identificacao.idade" placeholder="Idade" value={form.identificacao.idade} onChange={handleChange} />
+        <input type="text" name="identificacao.genero" placeholder="Gênero" value={form.identificacao.genero} onChange={handleChange} />
+        <input type="text" name="identificacao.profissao" placeholder="Profissão" value={form.identificacao.profissao} onChange={handleChange} />
 
-        <fieldset>
-          <legend>Identificação</legend>
-          <input name="nome_completo" placeholder="Nome Completo" onChange={(e) => handleChange(e, 'identificacao.nome_completo')} />
-          <input name="idade" placeholder="Idade" onChange={(e) => handleChange(e, 'identificacao.idade')} />
-          <input name="sexo" placeholder="Sexo" onChange={(e) => handleChange(e, 'identificacao.sexo')} />
-          <input name="profissao" placeholder="Profissão" onChange={(e) => handleChange(e, 'identificacao.profissao')} />
-          <input name="estado_civil" placeholder="Estado Civil" onChange={(e) => handleChange(e, 'identificacao.estado_civil')} />
-          <input name="escolaridade" placeholder="Escolaridade" onChange={(e) => handleChange(e, 'identificacao.escolaridade')} />
-          <input name="religiao" placeholder="Religião" onChange={(e) => handleChange(e, 'identificacao.religiao')} />
-        </fieldset>
+        <textarea name="queixa_principal" placeholder="Queixa principal" value={form.queixa_principal} onChange={handleChange} required />
+        <textarea name="historico_familiar" placeholder="Histórico familiar" value={form.historico_familiar} onChange={handleChange} />
+        <textarea name="medicamentos_uso" placeholder="Medicamentos em uso" value={form.medicamentos_uso} onChange={handleChange} />
+        <textarea name="alergias" placeholder="Alergias" value={form.alergias} onChange={handleChange} />
+        <textarea name="observacoes_finais" placeholder="Observações finais" value={form.observacoes_finais} onChange={handleChange} />
 
-        <fieldset>
-          <legend>Queixa principal</legend>
-          <textarea placeholder="Descreva sua queixa principal" onChange={(e) => handleChange(e, 'queixa_principal')} />
-        </fieldset>
-
-        <fieldset>
-          <legend>Sinais Vitais</legend>
-          <input placeholder="Pressão Arterial" onChange={(e) => handleChange(e, 'sinais_vitais.pressao_arterial')} />
-          <input placeholder="Temperatura Corporal" onChange={(e) => handleChange(e, 'sinais_vitais.temperatura_corporal')} />
-          <input placeholder="Frequência Cardíaca" onChange={(e) => handleChange(e, 'sinais_vitais.frequencia_cardiaca')} />
-        </fieldset>
-
-        <fieldset>
-          <legend>Estilo de Vida</legend>
-          <input placeholder="Alimentação" onChange={(e) => handleChange(e, 'estilo_vida.alimentacao')} />
-          <input placeholder="Atividade Física" onChange={(e) => handleChange(e, 'estilo_vida.atividade_fisica')} />
-          <input placeholder="Hábitos de Sono" onChange={(e) => handleChange(e, 'estilo_vida.habitos_sono')} />
-          <input placeholder="Estresse/Ansiedade" onChange={(e) => handleChange(e, 'estilo_vida.estresse_ansiedade')} />
-        </fieldset>
-
-        <fieldset>
-          <legend>Observações Finais</legend>
-          <textarea placeholder="Observações adicionais" onChange={(e) => handleChange(e, 'observacoes_finais')} />
-        </fieldset>
-
-        <div className="botoes">
-          <button type="button" onClick={onVoltar}>Voltar</button>
-          <button type="submit">Enviar</button>
-        </div>
+        <button type="submit" className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+          Enviar Anamnese
+        </button>
       </form>
     </div>
   );
