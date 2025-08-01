@@ -9,7 +9,7 @@ export default function TermoUso() {
   useEffect(() => {
     async function buscarTextoTermo() {
       try {
-        const res = await axios.get('http://localhost:5000/termos_texto');
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/termos_texto`);
         if (res.status === 200 && res.data.termo) {
           setTermoTexto(res.data.termo);
         } else {
@@ -20,6 +20,10 @@ export default function TermoUso() {
         setErro('Erro ao conectar com o servidor.');
       }
     }
+  
+    buscarTextoTermo();
+  }, []);
+  
 
     buscarTextoTermo();
   }, []);
@@ -42,15 +46,17 @@ export default function TermoUso() {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/termos_uso', {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/termos_uso`, {
         usuario_id,
         consentimento: true,
       });
+    
       if (res.status === 200) {
         window.location.href = '/cadastro-cliente';
       } else {
         setErro('Erro ao registrar aceite do termo.');
       }
+    
     } catch (err) {
       console.error(err);
       setErro('Erro ao aceitar o termo. Verifique sua conexão.');

@@ -28,12 +28,14 @@ export default function CadastroUsuario() {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/usuarios', {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/usuarios`, {
         email,
         senha,
         tipo_usuario: "C",
         tenant_id: "686af5e0bb776faa73fa8e03" // Tenant padrão
       });
+      // ... resto do código
+    
 
       if (res.status === 201) {
         // Salva o ID do usuário criado

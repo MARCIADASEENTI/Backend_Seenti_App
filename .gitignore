@@ -10,6 +10,8 @@ __pycache__/
 *.pyd
 venv/
 .env
+.env.local
+.env.production
 *.sqlite3
 
 # Logs e cache

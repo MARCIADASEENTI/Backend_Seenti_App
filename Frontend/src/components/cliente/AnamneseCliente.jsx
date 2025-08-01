@@ -82,15 +82,19 @@ const AnamneseCliente = () => {
     if (!validarCampos()) return;
 
     try {
-      const response = await axios.post('http://localhost:5000/anamneses', {
-        cliente_id,
-        dados: form
-      });
-      
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/anamneses`,
+        {
+          cliente_id,
+          dados: form
+        }
+      );
+    
       if (response.status === 201) {
         setSucesso('✅ Anamnese enviada com sucesso!');
         setTimeout(() => navigate('/perfil'), 1500);
       }
+    
     } catch (err) {
       console.error(err);
       if (err.response?.status === 409) {

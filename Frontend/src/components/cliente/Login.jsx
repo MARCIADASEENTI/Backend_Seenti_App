@@ -23,10 +23,12 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/login", {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/login`, {
         email,
         senha,
       });
+      
+    
 
       if (res.status === 200) {
         localStorage.setItem("usuario_id", res.data.usuario_id);

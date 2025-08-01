@@ -10,7 +10,8 @@ function PaginaCliente({ clienteId, onAbrirAnamnese, onAbrirAgendamento }) {
   useEffect(() => {
     const verificarAnamnese = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/clientes/${clienteId}/tem_anamnese`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}
+/clientes/${clienteId}/tem_anamnese`);
         const data = await response.json();
         setTemAnamnese(data.tem_anamnese);
       } catch (error) {

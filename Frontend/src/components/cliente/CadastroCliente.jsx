@@ -140,15 +140,16 @@ export default function CadastroCliente() {
         tenant_id: '686af5e0bb776faa73fa8e03', // Tenant padrão criado
       };
 
-      const res = await axios.post('http://localhost:5000/clientes', dadosCliente);
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/clientes`, dadosCliente);
 
-      if (res.status === 201 && res.data.cliente_id) {
-        localStorage.setItem('cliente_id', res.data.cliente_id);
-        setSucesso('✅ Cadastro realizado com sucesso!');
-        setTimeout(() => navigate('/perfil'), 1000);
-      } else {
-        setErro('Erro ao cadastrar cliente. Tente novamente.');
-      }
+if (res.status === 201 && res.data.cliente_id) {
+  localStorage.setItem('cliente_id', res.data.cliente_id);
+  setSucesso('✅ Cadastro realizado com sucesso!');
+  setTimeout(() => navigate('/perfil'), 1000);
+} else {
+  setErro('Erro ao cadastrar cliente. Tente novamente.');
+}
+
     } catch (err) {
       console.error(err);
       if (err.response?.status === 400) {

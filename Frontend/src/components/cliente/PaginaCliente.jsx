@@ -25,12 +25,13 @@ export default function PaginaCliente() {
       }
 
       try {
-        const res = await axios.get(`http://localhost:5000/clientes/${cliente_id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clientes/${cliente_id}`);
         if (res.status === 200) {
           setCliente(res.data);
         } else {
           setErro('⚠️ Não foi possível carregar os dados do cliente.');
         }
+      
       } catch (err) {
         console.error(err);
         setErro('⚠️ Erro ao buscar dados do cliente.');
