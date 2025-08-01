@@ -12,7 +12,7 @@ CORS(app)
 CORS(app, origins=[
     "https://seenti.vercel.app",
     "https://seenti-marcia-alves-projects.vercel.app",
-    
+]) 
 # --- MongoDB Atlas connection ---
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://<usuario>:<senha>@ps-terapia.8dgyy1d.mongodb.net/seenti_db")
 client = MongoClient(MONGO_URI)
