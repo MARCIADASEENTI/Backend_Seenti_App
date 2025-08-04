@@ -32,25 +32,29 @@ progresso_usuario = db["progresso_usuario"]
 # --- LOGIN ---
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.json or {}
-    email = data.get("email")
-    senha = data.get("senha")
+    try:
+        data = request.json or {}
+        email = data.get("email")
+        senha = data.get("senha")
 
-    if not email or not senha:
-        return jsonify({"erro": "Email e senha são obrigatórios"}), 400
+        if not email or not senha:
+            return jsonify({"erro": "Email e senha são obrigatórios"}), 400
 
-    usuario = usuarios.find_one({"email": email})
-    if not usuario:
-        return jsonify({"erro": "Usuário não encontrado. Deseja se cadastrar?"}), 404
+        usuario = usuarios.find_one({"email": email})
+        if not usuario:
+            return jsonify({"erro": "Usuário não encontrado. Deseja se cadastrar?"}), 404
 
-    if not check_password_hash(usuario["senha"], senha):
-        return jsonify({"erro": "Senha incorreta"}), 401
+        if not check_password_hash(usuario["senha"], senha):
+            return jsonify({"erro": "Senha incorreta"}), 401
 
-    return jsonify({
-        "mensagem": "Login realizado com sucesso",
-        "usuario_id": str(usuario["_id"]),
-        "tipo_usuario": usuario.get("tipo_usuario", "C")
-    }), 200
+        return jsonify({
+            "mensagem": "Login realizado com sucesso",
+            "usuario_id": str(usuario["_id"]),
+            "tipo_usuario": usuario.get("tipo_usuario", "C")
+        }), 200
+    except Exception as e:
+        print(f"[ERRO LOGIN] {str(e)}")
+        return jsonify({"erro": "Erro interno no servidor"}), 500
 
 # --- CADASTRO USUÁRIO ---
 @app.route("/usuarios", methods=["POST"])
