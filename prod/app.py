@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from flask_cors import CORS
+from pymongo import MongoClient  # ✅ ESSA LINHA
 from bson import ObjectId
 from datetime import datetime
 from dotenv import load_dotenv

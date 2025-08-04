@@ -24,10 +24,6 @@ export default function TermoUso() {
     buscarTextoTermo();
   }, []);
   
-
-    buscarTextoTermo();
-  }, []);
-
   const aceitarTermo = async () => {
     setErro('');
     setAceitando(true);

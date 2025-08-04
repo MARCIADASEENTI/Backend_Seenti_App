@@ -1,8 +1,8 @@
 // src/components/cliente/Login.jsx
 
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api"; // Importando o serviço axios
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -23,18 +23,12 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/login`, {
-        email,
-        senha,
-      });
-      
-    
+      const res = await api.post("/login", { email, senha });
 
       if (res.status === 200) {
         localStorage.setItem("usuario_id", res.data.usuario_id);
         localStorage.setItem("tipo_usuario", res.data.tipo_usuario);
-
-        navigate("/boas-vindas"); // Redireciona para a tela de boas-vindas
+        navigate("/boas-vindas");
       }
     } catch (err) {
       console.error("Erro de login:", err);

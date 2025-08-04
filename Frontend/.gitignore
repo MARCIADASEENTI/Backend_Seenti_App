@@ -40,3 +40,6 @@ checklist_retomada_seenti.md
 # Arquivos de sistema
 .DS_Store
 Thumbs.db
+# Node
+.env.local
+.env.production
