@@ -6,26 +6,26 @@ from datetime import datetime
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-import re
+import re  # ✅ Adicionado para tratar CPF
+
+load_dotenv()  # ✅ Carrega as variáveis do .env
 
 app = Flask(__name__)
-load_dotenv()
-
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
-# Conexão com o MongoDB via Flask-PyMongo
 mongo = PyMongo(app)
+db = mongo.db
+usuarios = db["usuarios"]
 
-# Coleções do banco
-usuarios = mongo.db.usuarios
-clientes = mongo.db.clientes
-anamneses = mongo.db.anamneses
-termos_uso = mongo.db.termos_uso
-progresso_usuario = mongo.db.progresso_usuario
-
+# --- Coleções ---
+usuarios = db["usuarios"]
+clientes = db["clientes"]
+anamneses = db["anamneses"]
+termos_uso = db["termos_uso"]
+progresso_usuario = db["progresso_usuario"]
 
 # --- LOGIN ---
 @app.route("/login", methods=["POST"])
