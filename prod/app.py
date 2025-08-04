@@ -7,8 +7,10 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import re  # ✅ Adicionado para tratar CPF
+import sys
 
 load_dotenv()  # ✅ Carrega as variáveis do .env
+print(f"MONGO_URI: {os.getenv('MONGO_URI')}", file=sys.stderr)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
