@@ -16,34 +16,16 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
+# Conexão com o MongoDB via Flask-PyMongo
 mongo = PyMongo(app)
-usuarios = mongo.db.usuarios  # coleção 'usuarios'
 
-# Exemplo de uso:
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    email = data.get('email')
-    senha = data.get('senha')
+# Coleções do banco
+usuarios = mongo.db.usuarios
+clientes = mongo.db.clientes
+anamneses = mongo.db.anamneses
+termos_uso = mongo.db.termos_uso
+progresso_usuario = mongo.db.progresso_usuario
 
-    usuario = usuarios.find_one({"email": email})
-    if usuario and check_password_hash(usuario["senha"], senha):
-        return jsonify({"msg": "Login realizado com sucesso!"}), 200
-    else:
-        return jsonify({"error": "Usuário ou senha incorretos"}), 401
-
-
-# --- MongoDB Atlas connection ---
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://<usuario>:<senha>@ps-terapia.8dgyy1d.mongodb.net/seenti_db")
-client = MongoClient(MONGO_URI)
-db = client["seenti_db"]
-
-# --- Collections ---
-usuarios = db["usuarios"]
-clientes = db["clientes"]
-anamneses = db["anamneses"]
-termos_uso = db["termos_uso"]
-progresso_usuario = db["progresso_usuario"]
 
 # --- LOGIN ---
 @app.route("/login", methods=["POST"])
