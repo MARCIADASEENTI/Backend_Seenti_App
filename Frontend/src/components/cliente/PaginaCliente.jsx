@@ -66,7 +66,7 @@ export default function PaginaCliente() {
   };
 
   return (
-    <WhiteLabelLayout>
+    
     <div className="max-w-2xl mx-auto mt-12 p-6 border rounded-lg shadow bg-white">
       <h2 className="text-2xl font-bold mb-4 text-green-700 text-center">
       <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: brand.fontFamily, color: brand.primaryColor }}>
@@ -135,6 +135,6 @@ export default function PaginaCliente() {
         </div>
       )}
     </div>
-    </WhiteLabelLayout> 
+    
      );
 }

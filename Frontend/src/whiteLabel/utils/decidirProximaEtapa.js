@@ -22,7 +22,7 @@ export async function decidirProximaEtapa(navigate) {
   }
 
   try {
-    const res = await axios.get(`http://localhost:5000/anamneses/cliente/${clienteId}`);
+    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/anamneses/cliente/${clienteId}`);
     const jaPreencheuAnamnese = res.data.existe;
 
     if (jaPreencheuAnamnese) {
