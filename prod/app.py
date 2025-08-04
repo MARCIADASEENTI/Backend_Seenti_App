@@ -1,27 +1,37 @@
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from flask_cors import CORS
-from pymongo import MongoClient  # ✅ ESSA LINHA
 from bson import ObjectId
 from datetime import datetime
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-import re  # ✅ Adicionado para tratar CPF
+import re
 
 app = Flask(__name__)
+load_dotenv()
 
-load_dotenv()  # ✅ Carrega as variáveis do .env
-
-app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 mongo = PyMongo(app)
-db = mongo.db
-usuarios = db["usuarios"]
+usuarios = mongo.db.usuarios  # coleção 'usuarios'
+
+# Exemplo de uso:
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get('email')
+    senha = data.get('senha')
+
+    usuario = usuarios.find_one({"email": email})
+    if usuario and check_password_hash(usuario["senha"], senha):
+        return jsonify({"msg": "Login realizado com sucesso!"}), 200
+    else:
+        return jsonify({"error": "Usuário ou senha incorretos"}), 401
+
 
 # --- MongoDB Atlas connection ---
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://<usuario>:<senha>@ps-terapia.8dgyy1d.mongodb.net/seenti_db")
