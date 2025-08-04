@@ -11,6 +11,8 @@ import sys
 
 load_dotenv()  # ✅ Carrega as variáveis do .env
 print(f"MONGO_URI: {os.getenv('MONGO_URI')}", file=sys.stderr)
+import ssl
+print("🔐 RENDER - OpenSSL version usada:", ssl.OPENSSL_VERSION)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
