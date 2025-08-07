@@ -7,8 +7,12 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import re  # ✅ Adicionado para tratar CPF
+import sys
 
 load_dotenv()  # ✅ Carrega as variáveis do .env
+print(f"MONGO_URI: {os.getenv('MONGO_URI')}", file=sys.stderr)
+import ssl
+print("🔐 RENDER - OpenSSL version usada:", ssl.OPENSSL_VERSION)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
@@ -27,28 +31,33 @@ anamneses = db["anamneses"]
 termos_uso = db["termos_uso"]
 progresso_usuario = db["progresso_usuario"]
 
+
 # --- LOGIN ---
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.json or {}
-    email = data.get("email")
-    senha = data.get("senha")
+    try:
+        data = request.json or {}
+        email = data.get("email")
+        senha = data.get("senha")
 
-    if not email or not senha:
-        return jsonify({"erro": "Email e senha são obrigatórios"}), 400
+        if not email or not senha:
+            return jsonify({"erro": "Email e senha são obrigatórios"}), 400
 
-    usuario = usuarios.find_one({"email": email})
-    if not usuario:
-        return jsonify({"erro": "Usuário não encontrado. Deseja se cadastrar?"}), 404
+        usuario = usuarios.find_one({"email": email})
+        if not usuario:
+            return jsonify({"erro": "Usuário não encontrado. Deseja se cadastrar?"}), 404
 
-    if not check_password_hash(usuario["senha"], senha):
-        return jsonify({"erro": "Senha incorreta"}), 401
+        if not check_password_hash(usuario["senha"], senha):
+            return jsonify({"erro": "Senha incorreta"}), 401
 
-    return jsonify({
-        "mensagem": "Login realizado com sucesso",
-        "usuario_id": str(usuario["_id"]),
-        "tipo_usuario": usuario.get("tipo_usuario", "C")
-    }), 200
+        return jsonify({
+            "mensagem": "Login realizado com sucesso",
+            "usuario_id": str(usuario["_id"]),
+            "tipo_usuario": usuario.get("tipo_usuario", "C")
+        }), 200
+    except Exception as e:
+        print(f"[ERRO LOGIN] {str(e)}")
+        return jsonify({"erro": "Erro interno no servidor"}), 500
 
 # --- CADASTRO USUÁRIO ---
 @app.route("/usuarios", methods=["POST"])
@@ -79,27 +88,44 @@ def criar_usuario():
     return jsonify({"mensagem": "Usuário criado com sucesso", "usuario_id": str(resultado.inserted_id)}), 201
 
 # --- TERMO DE USO ---
+from datetime import datetime
+from bson import ObjectId
+
 @app.route("/termos_uso", methods=["POST"])
-def termos_uso():
+def aceitar_termo_uso():
     data = request.json or {}
-    usuario_id = data.get('usuario_id')
-    consentimento = data.get('consentimento')
+    usuario_id = data.get("usuario_id")
+    consentimento = data.get("consentimento")
 
     if not usuario_id:
         return jsonify({"erro": "Campo 'usuario_id' é obrigatório."}), 400
 
     if consentimento is not True:
-        return jsonify({"erro": "O consentimento precisa ser True."}), 400
+        return jsonify({"erro": "O consentimento deve ser True."}), 400
 
-    resultado = usuarios.update_one(
-        {"_id": ObjectId(usuario_id)},
-        {"$set": {"consentimento": True}}
-    )
+    try:
+        usuario_obj_id = ObjectId(usuario_id)
+    except Exception:
+        return jsonify({"erro": "ID de usuário inválido."}), 400
 
-    if resultado.matched_count == 0:
+    usuario = usuarios.find_one({"_id": usuario_obj_id})
+    if not usuario:
         return jsonify({"erro": "Usuário não encontrado."}), 404
 
-    return jsonify({"mensagem": "Termo de uso aceito com sucesso."}), 200
+    # Verifica se já existe registro anterior
+    termo_existente = termos_uso.find_one({"usuario_id": usuario_id})
+    if termo_existente:
+        return jsonify({"mensagem": "Termo já aceito anteriormente."}), 200
+
+    # Salva novo termo
+    termos_uso.insert_one({
+        "usuario_id": usuario_id,
+        "consentimento": True,
+        "data_aceite": datetime.utcnow()
+    })
+
+    return jsonify({"mensagem": "Termo de uso aceito com sucesso."}), 201
+
 
 @app.route("/termos_texto", methods=["GET"])
 def obter_termos():
@@ -118,6 +144,15 @@ def obter_termos():
     """
 
     return jsonify({"termo": texto_completo.strip()}), 200
+
+@app.route("/termo-assinado/<usuario_id>", methods=["GET"])
+def verificar_termo_assinado(usuario_id):
+    termo = termos_uso.find_one({"usuario_id": usuario_id})
+
+    if not termo:
+        return jsonify({"assinado": False}), 200
+
+    return jsonify({"assinado": True}), 200
 
 # --- CLIENTE ---
 @app.route("/clientes", methods=["POST"])
@@ -247,6 +282,23 @@ def buscar_cliente(cliente_id):
     cliente = clientes.find_one({"_id": obj_id})
     if not cliente:
         return jsonify({"erro": "Cliente não encontrado"}), 404
+
+    cliente["_id"] = str(cliente["_id"])
+    cliente["usuario_id"] = str(cliente["usuario_id"])
+    return jsonify(cliente), 200
+
+#Novo endpoint
+
+@app.route("/clientes/usuario/<usuario_id>", methods=["GET"])
+def buscar_cliente_por_usuario(usuario_id):
+    try:
+        obj_id = ObjectId(usuario_id)
+    except Exception:
+        return jsonify({"erro": "ID de usuário inválido"}), 400
+
+    cliente = clientes.find_one({"usuario_id": obj_id})
+    if not cliente:
+        return jsonify({"erro": "Cliente não encontrado para este usuário"}), 404
 
     cliente["_id"] = str(cliente["_id"])
     cliente["usuario_id"] = str(cliente["usuario_id"])
@@ -467,5 +519,4 @@ def buscar_etapas_concluidas(usuario_id):
     }), 200
 
 if __name__ == "__main__":
-   # app.run(debug=True, host="0.0.0.0")
-   app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0")
