@@ -8,7 +8,7 @@ echo "🚀 Iniciando atualização do repositório Frontend..."
 
 # Caminho do projeto (ajuste se necessário)
 cd "$(dirname "$0")"
-
+cd ~/seenti_app/SeentiCliente/Frontend || exit
 # Adiciona alterações
 git add .
 

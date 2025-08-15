@@ -1,0 +1,64 @@
+.cadastro-container {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 24px;
+    background-color: #f5f5f5;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .cadastro-container h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #333;
+  }
+  
+  .cadastro-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  
+  .cadastro-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    color: #444;
+  }
+  
+  .cadastro-form input[type="email"],
+  .cadastro-form input[type="text"],
+  .cadastro-form input[type="password"] {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  
+  .termo-checkbox {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+  .termo-checkbox input {
+    margin-right: 8px;
+  }
+  
+  .cadastro-form button {
+    margin-top: 12px;
+    background-color: #0044cc;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .cadastro-form button:hover {
+    background-color: #0033aa;
+  }
+  

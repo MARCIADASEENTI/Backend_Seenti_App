@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { brand } from '../../whiteLabel/config/brandConfig';
 
 const AnamneseCliente = () => {
   const navigate = useNavigate();
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [form, setForm] = useState({
     objetivo: '',
@@ -30,6 +32,32 @@ const AnamneseCliente = () => {
     observacoes_saude: '',
     nao_gosta_massagem_em: ''
   });
+
+  // Carregar dados do cliente para preencher email e whatsapp
+  useEffect(() => {
+    const carregarDadosCliente = async () => {
+      try {
+        const cliente_id = localStorage.getItem('cliente_id');
+        if (cliente_id) {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/clientes/${cliente_id}`);
+          if (response.ok) {
+            const cliente = await response.json();
+            setForm(prev => ({
+              ...prev,
+              email: cliente.contato?.email || '',
+              whatsapp: cliente.contato?.telefone || ''
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do cliente:', error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    carregarDadosCliente();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -71,6 +99,7 @@ const AnamneseCliente = () => {
     e.preventDefault();
     setErro('');
     setSucesso('');
+    setLoading(true);
 
     const cliente_id = localStorage.getItem('cliente_id');
     if (!cliente_id) {
@@ -79,47 +108,81 @@ const AnamneseCliente = () => {
       return;
     }
 
-    if (!validarCampos()) return;
+    if (!validarCampos()) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/anamneses`,
-        {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/anamneses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           cliente_id,
           dados: form
-        }
-      );
+        })
+      });
     
       if (response.status === 201) {
         setSucesso('✅ Anamnese enviada com sucesso!');
         setTimeout(() => navigate('/perfil'), 1500);
+      } else {
+        const errorData = await response.json();
+        if (response.status === 409) {
+          setErro('Você já possui uma anamnese registrada.');
+        } else if (errorData?.erro) {
+          setErro(errorData.erro);
+        } else {
+          setErro('Erro ao enviar anamnese. Verifique os dados ou tente novamente.');
+        }
       }
     
     } catch (err) {
       console.error(err);
-      if (err.response?.status === 409) {
-        setErro('Você já possui uma anamnese registrada.');
-      } else if (err.response?.data?.erro) {
-        setErro(err.response.data.erro);
-      } else {
-        setErro('Erro ao enviar anamnese. Verifique os dados ou tente novamente.');
-      }
+      setErro('Erro ao enviar anamnese. Verifique os dados ou tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Aplicar cores do WhiteLabel
+  const primaryColor = brand?.primaryColor || '#1E3A8A';
+  const secondaryColor = brand?.secondaryColor || '#AC80DD';
+
+  if (initialLoading) {
+    return (
+      <div className="max-w-4xl mx-auto mt-8 p-6 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Carregando formulário...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto mt-8 p-6 border rounded-lg shadow bg-white">
-      <h2 className="text-2xl font-bold mb-6 text-center text-green-700">
-        Formulário de Anamnese
+      <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: primaryColor }}>
+        📋 Formulário de Anamnese
       </h2>
-
-      {erro && <p className="text-red-600 mb-4 p-3 bg-red-50 rounded">{erro}</p>}
-      {sucesso && <p className="text-green-600 mb-4 p-3 bg-green-50 rounded">{sucesso}</p>}
-
+  
+      {erro && (
+        <div className="text-red-600 mb-4 p-3 bg-red-50 rounded border border-red-200">
+          ⚠️ {erro}
+        </div>
+      )}
+      {sucesso && (
+        <div className="text-green-600 mb-4 p-3 bg-green-50 rounded border border-green-200">
+          {sucesso}
+        </div>
+      )}
+  
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Objetivo e Área de Ênfase */}
-        <div className="border rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">Objetivo e Foco</h3>
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
+            🎯 Objetivo e Foco
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -131,8 +194,9 @@ const AnamneseCliente = () => {
                 value={form.objetivo}
                 onChange={handleChange}
                 placeholder="Ex: Relaxamento e alívio lombar"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               />
             </div>
             <div>
@@ -145,16 +209,19 @@ const AnamneseCliente = () => {
                 value={form.area_enfase}
                 onChange={handleChange}
                 placeholder="Ex: Coluna lombar e ombros"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               />
             </div>
           </div>
         </div>
-
+  
         {/* Dor e Sintomas */}
-        <div className="border rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">Dor e Sintomas</h3>
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
+            🩺 Dor e Sintomas
+          </h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -165,119 +232,46 @@ const AnamneseCliente = () => {
                 value={form.dor_atual}
                 onChange={handleChange}
                 placeholder="Descreva sua dor atual, localização e características"
-                className="w-full border rounded px-3 py-2 h-20"
+                className="w-full border border-gray-300 rounded px-3 py-2 h-20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 required
+                disabled={loading}
               />
             </div>
-            
+  
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="enxaqueca"
-                  checked={form.enxaqueca}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Enxaqueca</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="depressao"
-                  checked={form.depressao}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Depressão</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="insonia"
-                  checked={form.insonia}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Insônia</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="dor_mandibula"
-                  checked={form.dor_mandibula}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Dor Mandíbula</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="bruxismo"
-                  checked={form.bruxismo}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Bruxismo</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="disturbio_renal"
-                  checked={form.disturbio_renal}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Distúrbio Renal</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="antecedente_oncologico"
-                  checked={form.antecedente_oncologico}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Antecedente Oncológico</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="pedra_rim"
-                  checked={form.pedra_rim}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Pedra no Rim</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="pedra_vesicula"
-                  checked={form.pedra_vesicula}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Pedra na Vesícula</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="doenca_cronica"
-                  checked={form.doenca_cronica}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <span className="text-sm">Doença Crônica</span>
-              </label>
+              {[
+                { key: 'enxaqueca', label: 'Enxaqueca' },
+                { key: 'depressao', label: 'Depressão' },
+                { key: 'insonia', label: 'Insônia' },
+                { key: 'dor_mandibula', label: 'Dor Mandíbula' },
+                { key: 'bruxismo', label: 'Bruxismo' },
+                { key: 'disturbio_renal', label: 'Distúrbio Renal' },
+                { key: 'antecedente_oncologico', label: 'Antecedente Oncológico' },
+                { key: 'pedra_rim', label: 'Pedra no Rim' },
+                { key: 'pedra_vesicula', label: 'Pedra na Vesícula' },
+                { key: 'doenca_cronica', label: 'Doença Crônica' }
+              ].map(({ key, label }) => (
+                <label key={key} className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name={key}
+                    checked={form[key]}
+                    onChange={handleChange}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    disabled={loading}
+                  />
+                  <span className="text-sm text-gray-700">{label}</span>
+                </label>
+              ))}
             </div>
           </div>
         </div>
-
+  
         {/* Saúde Geral */}
-        <div className="border rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">Saúde Geral</h3>
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
+            💊 Saúde Geral
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -287,8 +281,9 @@ const AnamneseCliente = () => {
                 name="funcionamento_intestinal"
                 value={form.funcionamento_intestinal}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               >
                 <option value="">Selecione...</option>
                 <option value="normal">Normal</option>
@@ -304,8 +299,9 @@ const AnamneseCliente = () => {
                 name="stress_diario"
                 value={form.stress_diario}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               >
                 <option value="">Selecione...</option>
                 <option value="baixo">Baixo</option>
@@ -323,7 +319,8 @@ const AnamneseCliente = () => {
                 value={form.anticoncepcional}
                 onChange={handleChange}
                 placeholder="Se aplicável"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
               />
             </div>
             <div>
@@ -336,15 +333,18 @@ const AnamneseCliente = () => {
                 value={form.alimentacao}
                 onChange={handleChange}
                 placeholder="Ex: Equilibrada, com frutas e vegetais"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
               />
             </div>
           </div>
         </div>
-
+  
         {/* Contato */}
-        <div className="border rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">Contato</h3>
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
+            📞 Contato
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -356,8 +356,9 @@ const AnamneseCliente = () => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="seu@email.com"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               />
             </div>
             <div>
@@ -370,16 +371,19 @@ const AnamneseCliente = () => {
                 value={form.whatsapp}
                 onChange={handleChange}
                 placeholder="(31) 99999-9999"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                disabled={loading}
               />
             </div>
           </div>
         </div>
-
+  
         {/* Observações */}
-        <div className="border rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">Observações</h3>
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
+            📝 Observações
+          </h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -390,7 +394,8 @@ const AnamneseCliente = () => {
                 value={form.observacoes_saude}
                 onChange={handleChange}
                 placeholder="Informações complementares sobre sua saúde"
-                className="w-full border rounded px-3 py-2 h-20"
+                className="w-full border border-gray-300 rounded px-3 py-2 h-20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                disabled={loading}
               />
             </div>
             <div>
@@ -403,26 +408,39 @@ const AnamneseCliente = () => {
                 value={form.nao_gosta_massagem_em}
                 onChange={handleChange}
                 placeholder="Ex: barriga, pés, rosto"
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
               />
             </div>
           </div>
         </div>
-
+  
         {/* Botões */}
         <div className="flex justify-between pt-4">
           <button
             type="button"
             onClick={() => navigate('/perfil')}
-            className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition"
+            className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition disabled:opacity-50"
+            disabled={loading}
           >
-            Voltar
+            ← Voltar
           </button>
           <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+            className="px-6 py-2 rounded text-white transition disabled:opacity-50"
+            style={{ backgroundColor: primaryColor }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = secondaryColor}
+            onMouseLeave={(e) => e.target.style.backgroundColor = primaryColor}
+            disabled={loading}
           >
-            Enviar
+            {loading ? (
+              <span className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Enviando...
+              </span>
+            ) : (
+              '📤 Enviar Anamnese'
+            )}
           </button>
         </div>
       </form>

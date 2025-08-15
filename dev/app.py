@@ -30,6 +30,8 @@ clientes = db["clientes"]
 anamneses = db["anamneses"]
 termos_uso = db["termos_uso"]
 progresso_usuario = db["progresso_usuario"]
+agendamentos = db["agendamentos"]
+terapeutas = db["terapeutas"]
 
 
 # --- LOGIN ---
@@ -223,9 +225,13 @@ def cadastrar_cliente():
         return jsonify({"erro": "Estado inválido. Use sigla brasileira (ex: SP, RJ, MG)"}), 400
 
     # Verificar se CPF já existe
+    print(f"🔍 Verificando se CPF {cpf} já existe na base...")
     cpf_existente = clientes.find_one({"cpf": cpf})
     if cpf_existente:
+        print(f"❌ CPF {cpf} já existe na base!")
         return jsonify({"erro": "CPF já cadastrado"}), 409
+    else:
+        print(f"✅ CPF {cpf} não existe na base, pode prosseguir")
 
     try:
         # Debug: verificar usuario_id
@@ -517,6 +523,163 @@ def buscar_etapas_concluidas(usuario_id):
         "total_etapas": len(etapas_esperadas),
         "etapas_concluidas": sum(1 for e in etapas_status if e["concluida"])
     }), 200
+
+# --- AGENDAMENTOS ---
+@app.route("/agendamentos", methods=["POST"])
+def criar_agendamento():
+    """Cria um novo agendamento"""
+    data = request.json or {}
+    cliente_id = data.get("cliente_id")
+    terapeuta_id = data.get("terapeuta_id")
+    data_agendamento = data.get("data")
+    horario = data.get("horario")
+    observacoes = data.get("observacoes", "")
+
+    if not all([cliente_id, terapeuta_id, data_agendamento, horario]):
+        return jsonify({"erro": "cliente_id, terapeuta_id, data e horario são obrigatórios"}), 400
+
+    try:
+        cliente_obj_id = ObjectId(cliente_id)
+        terapeuta_obj_id = ObjectId(terapeuta_id)
+    except Exception:
+        return jsonify({"erro": "IDs inválidos"}), 400
+
+    # Verificar se cliente existe
+    cliente = clientes.find_one({"_id": cliente_obj_id})
+    if not cliente:
+        return jsonify({"erro": "Cliente não encontrado"}), 404
+
+    # Verificar se terapeuta existe
+    terapeuta = terapeutas.find_one({"_id": terapeuta_obj_id})
+    if not terapeuta:
+        return jsonify({"erro": "Terapeuta não encontrado"}), 404
+
+    # Verificar se o horário está disponível
+    data_obj = datetime.strptime(data_agendamento, "%Y-%m-%d")
+    if data_obj < datetime.now().replace(hour=0, minute=0, second=0, microsecond=0):
+        return jsonify({"erro": "Não é possível agendar para datas passadas"}), 400
+
+    # Verificar conflito de horário
+    conflito = agendamentos.find_one({
+        "terapeuta_id": terapeuta_obj_id,
+        "data": data_obj,
+        "horario": horario,
+        "status": {"$nin": ["cancelado"]}
+    })
+    
+    if conflito:
+        return jsonify({"erro": "Este horário já está ocupado"}), 409
+
+    # Criar agendamento
+    novo_agendamento = {
+        "cliente_id": cliente_obj_id,
+        "terapeuta_id": terapeuta_obj_id,
+        "data": data_obj,
+        "horario": horario,
+        "observacoes": observacoes.strip(),
+        "status": "pendente",
+        "tenant_id": cliente.get("tenant_id"),
+        "data_criacao": datetime.now(),
+        "data_atualizacao": datetime.now()
+    }
+
+    resultado = agendamentos.insert_one(novo_agendamento)
+    return jsonify({
+        "mensagem": "Agendamento criado com sucesso",
+        "agendamento_id": str(resultado.inserted_id)
+    }), 201
+
+@app.route("/agendamentos/cliente/<cliente_id>", methods=["GET"])
+def buscar_agendamentos_cliente(cliente_id):
+    """Busca agendamentos de um cliente específico"""
+    try:
+        obj_id = ObjectId(cliente_id)
+    except Exception:
+        return jsonify({"erro": "ID de cliente inválido"}), 400
+
+    # Buscar agendamentos com dados do terapeuta
+    pipeline = [
+        {"$match": {"cliente_id": obj_id}},
+        {"$lookup": {
+            "from": "terapeutas",
+            "localField": "terapeuta_id",
+            "foreignField": "_id",
+            "as": "terapeuta"
+        }},
+        {"$unwind": "$terapeuta"},
+        {"$sort": {"data": 1, "horario": 1}}
+    ]
+
+    resultado = list(agendamentos.aggregate(pipeline))
+    
+    # Converter ObjectIds para strings
+    for doc in resultado:
+        doc["_id"] = str(doc["_id"])
+        doc["cliente_id"] = str(doc["cliente_id"])
+        doc["terapeuta_id"] = str(doc["terapeuta_id"])
+        doc["terapeuta"]["_id"] = str(doc["terapeuta"]["_id"])
+
+    return jsonify(resultado), 200
+
+@app.route("/agendamentos/<agendamento_id>", methods=["DELETE"])
+def cancelar_agendamento(agendamento_id):
+    """Cancela um agendamento"""
+    try:
+        obj_id = ObjectId(agendamento_id)
+    except Exception:
+        return jsonify({"erro": "ID de agendamento inválido"}), 400
+
+    # Verificar se agendamento existe
+    agendamento = agendamentos.find_one({"_id": obj_id})
+    if not agendamento:
+        return jsonify({"erro": "Agendamento não encontrado"}), 404
+
+    # Verificar se pode ser cancelado
+    if agendamento["status"] == "cancelado":
+        return jsonify({"erro": "Agendamento já foi cancelado"}), 400
+
+    # Cancelar agendamento
+    agendamentos.update_one(
+        {"_id": obj_id},
+        {
+            "$set": {
+                "status": "cancelado",
+                "data_atualizacao": datetime.now()
+            }
+        }
+    )
+
+    return jsonify({"mensagem": "Agendamento cancelado com sucesso"}), 200
+
+@app.route("/agendamentos/horarios-disponiveis", methods=["GET"])
+def obter_horarios_disponiveis():
+    """Retorna horários disponíveis para agendamento"""
+    horarios = [
+        "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+        "11:00", "11:30", "14:00", "14:30", "15:00", "15:30",
+        "16:00", "16:30", "17:00", "17:30", "18:00", "18:30"
+    ]
+    
+    return jsonify(horarios), 200
+
+# --- TERAPEUTAS ---
+@app.route("/terapeutas/disponiveis", methods=["GET"])
+def buscar_terapeutas_disponiveis():
+    """Retorna lista de terapeutas disponíveis para agendamento"""
+    try:
+        # Buscar terapeutas ativos
+        terapeutas_lista = list(terapeutas.find({"ativo": True}))
+        
+        # Converter ObjectIds para strings
+        for terapeuta in terapeutas_lista:
+            terapeuta["_id"] = str(terapeuta["_id"])
+            if "usuario_id" in terapeuta:
+                terapeuta["usuario_id"] = str(terapeuta["usuario_id"])
+
+        return jsonify(terapeutas_lista), 200
+    except Exception as e:
+        print(f"Erro ao buscar terapeutas: {str(e)}")
+        return jsonify({"erro": "Erro ao buscar terapeutas"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")

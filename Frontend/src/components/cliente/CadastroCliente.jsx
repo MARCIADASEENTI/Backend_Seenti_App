@@ -1,5 +1,3 @@
-// src/components/cliente/CadastroCliente.jsx
-
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +22,7 @@ export default function CadastroCliente() {
 
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -35,46 +34,46 @@ export default function CadastroCliente() {
     cpf = cpf.replace(/[^\d]/g, '');
     if (cpf.length !== 11) return false;
     if (cpf === cpf[0].repeat(11)) return false;
-    
+
     let soma = 0;
     for (let i = 0; i < 9; i++) {
       soma += parseInt(cpf[i]) * (10 - i);
     }
     let resto = 11 - (soma % 11);
     let digito1 = resto < 2 ? 0 : resto;
-    
+
     soma = 0;
     for (let i = 0; i < 10; i++) {
       soma += parseInt(cpf[i]) * (11 - i);
     }
     resto = 11 - (soma % 11);
     let digito2 = resto < 2 ? 0 : resto;
-    
+
     return cpf[9] === digito1.toString() && cpf[10] === digito2.toString();
   };
 
-  // Validação de idade
+  // Validação de idade (18+)
   const validarIdade = (dataNascimento) => {
     const hoje = new Date();
     const nascimento = new Date(dataNascimento);
-    const idade = hoje.getFullYear() - nascimento.getFullYear();
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
     const mes = hoje.getMonth() - nascimento.getMonth();
-    
+
     if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-      return idade - 1;
+      idade--;
     }
     return idade;
   };
 
+  // Validação dos campos obrigatórios
   const validarCampos = () => {
     const { primeiro_nome, sobrenome, cpf, data_nascimento, telefone, rua, numero, bairro, cidade, estado, cep } = form;
-    
+
     if (!primeiro_nome || !sobrenome || !cpf || !data_nascimento || !telefone) {
       setErro('⚠️ Preencha todos os campos obrigatórios.');
       return false;
     }
 
-    // Validação de endereço
     if (!rua || !numero || !bairro || !cidade || !estado || !cep) {
       setErro('⚠️ Preencha todos os campos de endereço obrigatórios.');
       return false;
@@ -98,19 +97,40 @@ export default function CadastroCliente() {
     e.preventDefault();
     setErro('');
     setSucesso('');
+    setLoading(true);
 
     const usuario_id = localStorage.getItem('usuario_id');
 
     if (!usuario_id) {
       setErro('Usuário não autenticado. Faça login novamente.');
+      setLoading(false);
       navigate('/login');
       return;
     }
 
-    if (!validarCampos()) return;
+    if (!validarCampos()) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      // Formatar dados conforme nova estrutura do backend
+      // Verifica se cliente já existe para o usuário atual
+      const clienteExistente = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clientes/usuario/${usuario_id}`);
+      if (clienteExistente?.data?._id) {
+        setLoading(false);
+        navigate('/perfil');
+        return;
+      }
+    } catch (error) {
+      if (error?.response?.status !== 404) {
+        setErro('Erro ao verificar cliente existente.');
+        setLoading(false);
+        return;
+      }
+      // Se 404, cliente não existe, segue o fluxo
+    }
+
+    try {
       const dadosCliente = {
         usuario_id,
         primeiro_nome: form.primeiro_nome.trim(),
@@ -119,14 +139,10 @@ export default function CadastroCliente() {
         cpf: form.cpf.replace(/[^\d]/g, ''),
         data_nascimento: form.data_nascimento,
         genero: form.genero || null,
-        
-        // Subdocumento contato
         contato: {
           telefone: form.telefone.replace(/[^\d]/g, ''),
-          email_alternativo: null // Pode ser adicionado no futuro
+          email_alternativo: null,
         },
-        
-        // Subdocumento endereco
         endereco: {
           rua: form.rua.trim(),
           numero: form.numero.trim(),
@@ -134,38 +150,56 @@ export default function CadastroCliente() {
           bairro: form.bairro.trim(),
           cidade: form.cidade.trim(),
           estado: form.estado.trim(),
-          cep: form.cep.replace(/[^\d]/g, '')
+          cep: form.cep.replace(/[^\d]/g, ''),
         },
-        
-        tenant_id: '686af5e0bb776faa73fa8e03', // Tenant padrão criado
+        tenant_id: '686af5e0bb776faa73fa8e03',
       };
+
+      console.log('🔍 Enviando dados do cliente:', dadosCliente);
+      console.log('🔍 CPF sendo enviado:', dadosCliente.cpf);
 
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/clientes`, dadosCliente);
 
-if (res.status === 201 && res.data.cliente_id) {
-  localStorage.setItem('cliente_id', res.data.cliente_id);
-  setSucesso('✅ Cadastro realizado com sucesso!');
-  setTimeout(() => navigate('/perfil'), 1000);
-} else {
-  setErro('Erro ao cadastrar cliente. Tente novamente.');
-}
-
+      if (res.status === 201 && res.data.cliente_id) {
+        localStorage.setItem('cliente_id', res.data.cliente_id);
+        setSucesso('✅ Cadastro realizado com sucesso!');
+        setTimeout(() => navigate('/perfil'), 1000);
+      } else {
+        setErro('Erro ao cadastrar cliente. Tente novamente.');
+      }
     } catch (err) {
-      console.error(err);
+      console.error('❌ Erro detalhado:', err);
+      console.error('❌ Status da resposta:', err.response?.status);
+      console.error('❌ Dados da resposta:', err.response?.data);
+      
       if (err.response?.status === 400) {
         setErro(err.response.data.erro || 'Dados inválidos ou incompletos. Revise os campos.');
       } else if (err.response?.status === 409) {
-        setErro('CPF já cadastrado. Use um CPF diferente.');
+        // Cliente já cadastrado → redirecionar
+        setErro('CPF já cadastrado na base de dados. Use outro CPF ou faça login.');
+        setTimeout(() => navigate('/login'), 2000);
       } else if (err.response?.status === 500) {
         setErro('Erro interno do servidor. Tente novamente.');
       } else {
         setErro('Erro de conexão com o servidor. Verifique sua internet.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-xl mx-auto mt-12 p-6 border rounded-lg shadow bg-white">
+      
+      {/* Botão Voltar */}
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="mb-4 px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        ← Voltar
+      </button>
+
       <h2 className="text-2xl font-bold mb-4 text-center text-green-700">
         Cadastro do Cliente
       </h2>
@@ -173,7 +207,11 @@ if (res.status === 201 && res.data.cliente_id) {
       {erro && <p className="text-red-600 mb-4">{erro}</p>}
       {sucesso && <p className="text-green-600 mb-4">{sucesso}</p>}
 
+      {/* Formulário continua igual */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+        
+        {/* Campos pessoais */}
+        {/* ... restante dos inputs iguais ao seu código atual ... */}
         <div className="grid grid-cols-2 gap-2">
           <input
             name="primeiro_nome"
@@ -342,11 +380,15 @@ if (res.status === 201 && res.data.cliente_id) {
 
         <button
           type="submit"
-          className="bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+          disabled={loading}
+          className={`py-2 rounded text-white transition ${
+            loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+          }`}
         >
-          Cadastrar
+          {loading ? 'Cadastrando...' : 'Cadastrar'}
         </button>
       </form>
+      
     </div>
   );
 }

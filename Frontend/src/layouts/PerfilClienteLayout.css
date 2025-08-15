@@ -1,0 +1,209 @@
+/* PerfilClienteLayout.css */
+.perfil-cliente-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.perfil-sidebar {
+  width: 16rem;
+  background-color: #1E3A8A; /* Cor padrão Seenti */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid #AC80DD;
+  flex-direction: column;
+  display: flex; /* SEMPRE mostrar a sidebar desktop */
+}
+
+.perfil-sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Controle específico para logos */
+.perfil-sidebar-header img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background-color: white;
+  padding: 0.25rem;
+}
+
+.perfil-sidebar-logo {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #1E3A8A, #AC80DD);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.perfil-sidebar-nav {
+  flex: 1;
+  padding: 1rem;
+}
+
+.perfil-sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.perfil-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.perfil-mobile-header {
+  display: none;
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.perfil-content {
+  flex: 1;
+  padding: 1rem 2rem;
+}
+
+.perfil-mobile-menu-button {
+  padding: 0.5rem;
+  color: #4b5563;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+}
+
+.perfil-mobile-menu-button:hover {
+  color: #1f2937;
+  background-color: #f3f4f6;
+}
+
+.perfil-mobile-sidebar {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none; /* Esconder sidebar mobile por padrão */
+}
+
+.perfil-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.perfil-mobile-sidebar-content {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 16rem;
+  background-color: #1E3A8A;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: translateX(-100%); /* Começar escondida */
+  transition: transform 0.3s ease-in-out;
+}
+
+.perfil-mobile-sidebar-content.show {
+  transform: translateX(0);
+}
+
+/* Responsividade */
+@media (min-width: 768px) {
+  .perfil-sidebar {
+    display: flex !important; /* Forçar exibição em desktop */
+  }
+  
+  .perfil-mobile-header {
+    display: none;
+  }
+  
+  .perfil-mobile-sidebar {
+    display: none !important; /* Esconder completamente em desktop */
+  }
+}
+
+@media (max-width: 767px) {
+  .perfil-sidebar {
+    display: none !important; /* Esconder sidebar desktop em mobile */
+  }
+  
+  .perfil-mobile-header {
+    display: block;
+  }
+  
+  .perfil-content {
+    padding: 1rem;
+  }
+}
+
+/* Menu items */
+.perfil-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: white;
+}
+
+.perfil-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.perfil-menu-item.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-left: 4px solid #AC80DD;
+}
+
+.perfil-menu-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.perfil-menu-text {
+  flex: 1;
+}
+
+.perfil-menu-label {
+  font-weight: 500;
+  color: inherit;
+}
+
+.perfil-menu-description {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Logout button */
+.perfil-logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #fca5a5;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.perfil-logout-button:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}

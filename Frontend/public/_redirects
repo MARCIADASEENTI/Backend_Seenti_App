@@ -1,0 +1,10 @@
+# SPA Routing - Todas as rotas vão para index.html
+/*    /index.html   200
+
+# Headers para arquivos JavaScript
+/assets/*.js
+  Content-Type: application/javascript
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js
+  Content-Type: application/javascript

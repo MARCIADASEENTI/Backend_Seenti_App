@@ -1,0 +1,8 @@
+{
+  "orgId": "xxx",
+  "projectId": "yyy",
+  "settings": {
+    "framework": "vite",
+    "rootDirectory": null
+  }
+}
